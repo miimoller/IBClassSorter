@@ -1,0 +1,144 @@
+﻿@page "/classPref"
+
+@inject NavigationManager NavigationManager
+@using IBClassSorter.Data
+
+<h3>ClassPreferences</h3>
+
+@for(int i=0;i<allClasses.Count;i++){
+    int currentIndex = i;
+    
+    <RadzenRow>
+        <RadzenLabel>@getClassInfo(currentIndex)</RadzenLabel>
+        <RadzenCheckBoxList Value=@allPeriodPreferences[currentIndex].preferedPeriods Change=@(args=>updatePrefPeriods(currentIndex,args)) TValue="int">
+            <Items>
+                <RadzenCheckBoxListItem Text="0" Value=0 Disabled="true"/>
+                <RadzenCheckBoxListItem Text="1" Value=1 Disabled="@oneDis"/>
+                <RadzenCheckBoxListItem Text="2" Value=2 Disabled="@twoDis"/>
+                <RadzenCheckBoxListItem Text="3" Value=3 Disabled="@threeDis" />
+                <RadzenCheckBoxListItem Text="4" Value=4 Disabled="@fourDis" />
+                <RadzenCheckBoxListItem Text="5" Value=5 Disabled="@fiveDis"/>
+                <RadzenCheckBoxListItem Text="6" Value=6 Disabled="@sixDis"/>
+                <RadzenCheckBoxListItem Text="7" Value=7 Disabled="true" />
+            </Items>
+        </RadzenCheckBoxList>
+        <RadzenRadioButtonList TValue="int" Change=@(args=>updateDontCareStat(currentIndex, args))  @bind-Value="@allPeriodPreferences[currentIndex].preferencePower">
+            <Items>
+                <RadzenRadioButtonListItem Text="Required Placement" Value="1" />
+                <RadzenRadioButtonListItem Text="Highly-Prefered Placement" Value="2" />
+                <RadzenRadioButtonListItem Text="Don't Care" Value="3" />
+            </Items>
+        </RadzenRadioButtonList>
+        <RadzenLabel>Is non-IB (given lower importance)</RadzenLabel>
+        <RadzenCheckBox @bind-Value="@allPeriodPreferences[currentIndex].isElective"></RadzenCheckBox>
+    </RadzenRow>
+}
+<RadzenButton Click="enter">Enter </RadzenButton>
+@code {
+    public List<ClassModel> allClasses;
+    public List<Data.ClassPreferences> allPeriodPreferences = new List<Data.ClassPreferences>();
+
+
+    public bool oneDis=false;
+    public bool twoDis=false;
+    public bool threeDis=false;
+    public bool fourDis = false;
+    public bool fiveDis = false;
+    public bool sixDis = false;
+
+    public string getClassInfo(int index){
+
+        return allClasses[index].course.name + ": " + allClasses[index].teacher.name;
+    }
+
+    public void updateDontCareStat(int index, int id){
+        if (id==3){
+            allPeriodPreferences[index].preferedPeriods.Clear();
+            oneDis=true;
+            twoDis=true;
+            threeDis = true;
+            fourDis=true;
+            fiveDis=true;
+            sixDis = true;
+
+        }else{
+            oneDis = false;
+            twoDis = false;
+            threeDis = false;
+            fourDis = false;
+            fiveDis = false;
+            sixDis = false;
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        allClasses = DataSorter.allClasses;
+
+        foreach (ClassModel x in allClasses){
+            List<int> tempClassPrefs = new List<int>();
+            bool req = false;
+            if(x.zeroAvail){
+                tempClassPrefs.Add(0);
+                req = true;
+            }
+            if(x.sevenAvail){
+                tempClassPrefs.Add(7);
+                req = true;
+            }
+
+            if(req){
+                allPeriodPreferences.Add(new Data.ClassPreferences
+                    {
+                        classModel = x,
+                        preferedPeriods = tempClassPrefs,
+                        preferencePower = 1
+                    });
+                oneDis = false;
+                twoDis = false;
+                threeDis = false;
+                fourDis = false;
+                fiveDis = false;
+                sixDis = false;
+            }else{
+                allPeriodPreferences.Add(new Data.ClassPreferences
+                    {
+                        classModel = x,
+                        preferedPeriods = tempClassPrefs,
+                        preferencePower = 3
+                    });
+
+                oneDis = true;
+                twoDis = true;
+                threeDis = true;
+                fourDis = true;
+                fiveDis = true;
+                sixDis = true;
+            }
+            
+
+
+        }
+    }
+
+    public void updatePrefPeriods(int index, IEnumerable<int> a)
+    {
+        ClassModel x = allPeriodPreferences[index].classModel;
+        if (x.numTimesTeaching<a.Count()){
+            return;//too many of them put in
+        }
+
+        List<int> tempPeriods = (List<int>)(a).Cast<int>().ToList();
+        allPeriodPreferences[index].preferedPeriods = tempPeriods;
+    }
+
+    public void enter(){
+        DataSorter.classPreferences = allPeriodPreferences;
+        NavigationManager.NavigateTo("inStudents");
+    }
+
+    
+
+    //what periods they perfer
+        //if its an elective or ib class
+}

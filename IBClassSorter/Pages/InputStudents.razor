@@ -1,0 +1,76 @@
+﻿@page "/inStudents"
+@inject NavigationManager NavigationManager
+@using IBClassSorter.Data
+<h3>InputStudents</h3>
+
+<RadzenNumeric TValue="int" @bind-Value="totalStudents"></RadzenNumeric>
+@for(int i=0;i<totalStudents;i++){
+    int currentIndex = i;
+    <RadzenRow>
+        <RadzenTextBox Placeholder="Enter Student Name" Change="@(args=> updateStudentList(args, currentIndex))"></RadzenTextBox>
+        <RadzenDropDown Change="@(args=> updateStudentList(args, currentIndex))" TextProperty="name" Data="@allCourses" Multiple="true" AllowSelectAll="false" TValue="CourseModel" Disabled="@checkStudentDisabled(currentIndex)"></RadzenDropDown>
+    </RadzenRow>
+}
+
+<RadzenButton Click="@enter">Enter</RadzenButton>
+
+
+@code {
+    public int totalStudents;
+    public List<StudentModel> allStudents;
+    public List<CourseModel> allCourses;
+
+    public bool checkStudentDisabled(int index){
+        return getStudentByIndex(index) == null;
+    }
+
+    public void enter(){
+        DataSorter.allStudents = allStudents;
+        DataSorter.setAllPossibleIndividualTeacherSchedules();
+        NavigationManager.NavigateTo("scheduleDisplay");
+    }
+
+    public void updateStudentList(object a, int currentIndex){
+        List<CourseModel> tempCourses = (List<CourseModel>)((IEnumerable<object>)a).Cast<CourseModel>().ToList();
+
+        allStudents[currentIndex].courses = tempCourses;
+    }
+
+
+    protected override void OnInitialized()
+    {
+        allCourses = DataSorter.allCourses;
+        allStudents = new List<StudentModel>();
+    }
+
+    public void updateStudentList(string s, int index){
+        StudentModel x = getStudentByIndex(index);
+        if (x == null)
+        {
+            allStudents.Add(new StudentModel
+                {
+                    id = index,
+                    name = s,
+                    courses=new List<CourseModel>()
+                });
+        }
+        else
+        {
+            x.name = s;
+        }
+       
+
+    }
+
+    public StudentModel getStudentByIndex(int index)
+    {
+        foreach (StudentModel x in allStudents)
+        {
+            if (x.id == index)
+            {
+                return x;
+            }
+        }
+        return null;
+    }
+}

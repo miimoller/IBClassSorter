@@ -1,0 +1,64 @@
+﻿@page "/"
+@inject NavigationManager NavigationManager
+@using IBClassSorter.Data
+<h3>InputTeachers</h3>
+
+<RadzenNumeric TValue="int" Value="totalTeachers" Change="@(args=> updateTotalTeacherNumber(args))"></RadzenNumeric>
+
+@for(int i=0;i<totalTeachers;i++){
+    int currentIndex = i;
+    <RadzenRow>
+            <RadzenTextBox Placeholder="Enter teacher Name" Change="@(args=> updateTeacherList(args, currentIndex))"></RadzenTextBox>
+    </RadzenRow>
+}
+<RadzenButton Click="enter">Enter Classes</RadzenButton>
+
+@code {
+    public int totalTeachers = 0;
+    public List<TempTeacherHolder> teachers = new List<TempTeacherHolder>();
+
+    public void updateTotalTeacherNumber(int num){
+        totalTeachers = num;
+    }
+
+    public void updateTeacherList(string name, int index){
+        TempTeacherHolder x = getTeacherByIndex(index);
+        if (x==null){
+            teachers.Add(new TempTeacherHolder{
+                id=index,
+                name=name
+            });
+        }else{
+            x.name = name;
+        }
+        
+    }
+
+    public TempTeacherHolder getTeacherByIndex(int index){
+        foreach (TempTeacherHolder x in teachers){
+            if (x.id==index){
+                return x;
+            }
+        }
+        return null;
+    }
+
+    public void enter(){
+        int idcounter = 0;
+        List<TeacherModel> newTeachers = new List<TeacherModel>();
+        foreach(TempTeacherHolder x in teachers){
+            newTeachers.Add(new TeacherModel {
+                classes=new List<ClassModel>(),
+                id = idcounter++,
+                name=x.name
+            });
+        }
+        DataSorter.allTeachers = newTeachers;
+        NavigationManager.NavigateTo("inClasses");
+    }
+
+    public class TempTeacherHolder{
+        public int id { get; set; }
+        public string name { get; set; }
+    }
+}

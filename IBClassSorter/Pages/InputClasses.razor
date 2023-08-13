@@ -1,0 +1,234 @@
+﻿@page "/inClasses"
+@inject NavigationManager NavigationManager
+@using IBClassSorter.Data
+
+<h1>Enter Classes</h1>
+
+<RadzenNumeric TValue="int" Value="totalClasses" Change="@(args=> updateTotalClassNumber(args))"></RadzenNumeric>
+@if (allTeachers.Count != 0)
+{
+
+
+    @for (int i = 0; i < totalClasses; i++)
+    {
+        int currentIndex = i;
+
+        <RadzenRow>
+
+
+            <RadzenTextBox Placeholder="Enter class Name" Change="@(args=> updateClassName(args, currentIndex))"></RadzenTextBox>
+
+            <RadzenLabel>Enter Teachers for this Class</RadzenLabel>
+            <RadzenDropDown Change="@(args=> updateTeacherList(args, currentIndex))" TValue="TeacherModel" Data="@allTeachers" Multiple="true" TextProperty="name" AllowSelectAll="false"></RadzenDropDown>
+
+
+            @if (getClassTeachersByIndex(currentIndex) != null && getClassTeachersByIndex(currentIndex).teachers.Count != 0)
+            {
+                TeacherHolder currentClassTeachers = getClassTeachersByIndex(currentIndex);
+                for (int j = 0; j <currentClassTeachers.teachers.Count;j++){
+                    int currentTeacherIndex = j;
+                    <RadzenRow>
+                       <RadzenLabel>@getTeacherName(currentClassTeachers,currentTeacherIndex)</RadzenLabel>
+                       <RadzenLabel>Number of classes</RadzenLabel>
+                        <RadzenNumeric TValue="int" Value=@getClassTeachersByIndex(currentIndex).teachers[currentTeacherIndex].numClasses Change="@(args=> updateTeacherNumClasses(currentIndex, currentTeacherIndex, args))"></RadzenNumeric>
+                        <RadzenLabel>Able to 0 Period?</RadzenLabel>
+                        <RadzenCheckBox TValue="bool" Value=@getClassTeachersByIndex(currentIndex).teachers[currentTeacherIndex].zeroAvail Change=@(args=> updateTeacherZero(currentIndex, currentTeacherIndex,args))></RadzenCheckBox>
+                        <RadzenLabel>Able to 7 Period (like TOK)?</RadzenLabel>
+                        <RadzenCheckBox TValue="bool"  Value=@getClassTeachersByIndex(currentIndex).teachers[currentTeacherIndex].sevenAvail  Change=@(args=> updateTeacherSeven(currentIndex, currentTeacherIndex,args))></RadzenCheckBox>
+                    </RadzenRow>
+                }
+            }
+
+
+        </RadzenRow>
+    }
+}
+<RadzenButton Click="enter">Enter Classes</RadzenButton>
+
+@code {
+    List<TeacherModel> allTeachers = new List<TeacherModel>();
+    List<TeacherHolder> teacherGrid = new List<TeacherHolder>();
+    /*
+    * Add number of classes a teacher teaches per course
+    * 0 period option
+    */
+
+    public void updateTeacherZero(int classIndex, int teacherIndex, bool zero){
+
+        TeacherModel tempTeach = getClassTeachersByIndex(classIndex).teachers[teacherIndex].teacherData;
+
+        if (zero){
+            for (int i = 0; i < teacherGrid.Count; i++)
+            {
+                for (int j = 0; j < teacherGrid[i].teachers.Count; j++)
+                {
+                    if (teacherGrid[i].teachers[j].zeroAvail && teacherGrid[i].teachers[j].teacherData == tempTeach)
+                    {
+                        //Error: Teacher Already Registered Zero for another class
+                        return;
+                    }
+                }
+            }
+        }
+
+
+        getClassTeachersByIndex(classIndex).teachers[teacherIndex].zeroAvail = zero;
+    }
+
+    public void updateTeacherSeven(int classIndex, int teacherIndex, bool seven)
+    {
+        TeacherModel tempTeach = getClassTeachersByIndex(classIndex).teachers[teacherIndex].teacherData;
+        if(seven){
+            for (int i = 0; i < teacherGrid.Count; i++)
+            {
+                for (int j = 0; j < teacherGrid[i].teachers.Count; j++)
+                {
+                    if (teacherGrid[i].teachers[j].sevenAvail && teacherGrid[i].teachers[j].teacherData==tempTeach)
+                    {
+                        //Error: Teacher Already Registered Seven for another class
+                        return;
+                    }
+                }
+            }
+        }
+        
+
+        getClassTeachersByIndex(classIndex).teachers[teacherIndex].sevenAvail = seven;
+    }
+
+    public void updateTeacherNumClasses(int classIndex, int teacherIndex, int numClasses){
+        TeacherHolder x = getClassTeachersByIndex(classIndex);
+        x.teachers[teacherIndex].numClasses = numClasses;
+    }
+
+    public string getTeacherName(TeacherHolder t, int index){
+        return t.teachers[index].teacherData.name;
+    }
+
+    public void updateTeacherList(object a, int index){
+        List<TeacherModel> classTeachers = (List<TeacherModel>)((IEnumerable<object>)a).Cast<TeacherModel>().ToList();
+        List<IndividualTeacherHolder> teacherData = new List<IndividualTeacherHolder>();
+
+
+
+        foreach (TeacherModel x in classTeachers){
+            teacherData.Add(new IndividualTeacherHolder
+                {
+                    teacherData = x,
+                    numClasses=0,
+                    zeroAvail=false,
+                    sevenAvail=false
+                    
+                });
+        }
+        if (getClassTeachersByIndex(index) != null)
+        {
+            getClassTeachersByIndex(index).teachers = teacherData;
+        }else{
+            teacherGrid.Add(new TeacherHolder
+                {
+                    teachers = teacherData,
+                    classIndex = index
+                });
+        }
+
+
+
+    }
+
+    public TeacherHolder getClassTeachersByIndex(int index){
+        foreach(TeacherHolder y in teacherGrid){
+            if (y.classIndex==index){
+                return y;
+            }
+        }
+        return null;
+    }
+
+    protected override void OnInitialized(){
+        allTeachers = DataSorter.allTeachers;
+    }
+
+
+    List<string> tempClassNames = new List<string>();
+
+
+
+
+
+
+    int totalClasses = 0;
+    List<CourseModel> clases = new List<CourseModel>();
+
+    public void updateTotalClassNumber(int newTotal){
+        totalClasses = newTotal;
+    }
+
+    public void updateClassName(string name, int index){
+
+        if (tempClassNames.Count<=index){
+            tempClassNames.Add(name);
+        }else{
+            tempClassNames[index] = name;
+        }
+
+
+
+    }
+
+    public void enter(){
+        int classIDCounter = 0;
+        int courseIDCounter = 0;
+        List<CourseModel> allCourses = new List<CourseModel>();
+        List<ClassModel> allClasses = new List<ClassModel>();
+        foreach (TeacherHolder x in teacherGrid){
+            List<TeacherModel> tempTeachers = new List<TeacherModel>();
+
+            foreach (IndividualTeacherHolder y in x.teachers)
+            {
+                tempTeachers.Add(y.teacherData);
+            }
+            CourseModel tempCourse = new CourseModel {
+                    id = courseIDCounter++,
+                    name = tempClassNames[courseIDCounter - 1],
+                    teachers = tempTeachers
+                };
+
+            allCourses.Add(tempCourse);
+
+            foreach (IndividualTeacherHolder y in x.teachers){
+                ClassModel tempClass = new ClassModel
+                    {
+                        id = classIDCounter++,
+                        numTimesTeaching = y.numClasses,
+                        teacher = y.teacherData,
+                        zeroAvail = y.zeroAvail,
+                        course = tempCourse,
+                        sevenAvail=y.sevenAvail
+                        
+                    };
+                allClasses.Add(tempClass);
+                y.teacherData.classes.Add(tempClass);
+            }
+
+        }
+        DataSorter.allClasses = allClasses;
+        DataSorter.allCourses = allCourses;
+        NavigationManager.NavigateTo("classPref");
+    }
+
+    public class TeacherHolder{
+        public int classIndex { get; set; }
+
+        public List<IndividualTeacherHolder> teachers { get; set; }
+
+    }
+
+    public class IndividualTeacherHolder{
+        public TeacherModel teacherData { get; set; }
+        public int numClasses { get; set; }
+        public bool zeroAvail { get; set; }
+        public bool sevenAvail { get; set; }
+    }
+
+}
