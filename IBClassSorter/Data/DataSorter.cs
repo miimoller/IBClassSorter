@@ -552,7 +552,7 @@ namespace IBClassSorter.Data
         }
 
         public static void setPossibleSchedules(int currentIndex, List<TeacherSchedule> temp)
-        {
+        {//add multithREADING
             List<TeacherSchedule> currentSchedules = new List<TeacherSchedule>();
             foreach(TeacherSchedule schedule in temp)
             {
