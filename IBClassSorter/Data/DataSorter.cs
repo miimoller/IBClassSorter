@@ -21,8 +21,8 @@ namespace IBClassSorter.Data
 
         public static List<possibleTeacherSchedules> allTeacherSchedules = new List<possibleTeacherSchedules>();
 
-        
-        public static List<possibleSchoolSchedules> allSchedulePossibilities=new List<possibleSchoolSchedules>();
+
+        public static List<List<possibleSchoolSchedules>> allSchedulePossibilities = new List<List<possibleSchoolSchedules>>();
         public static int currentListIndex = 0;
         
 
@@ -428,7 +428,7 @@ namespace IBClassSorter.Data
 
         public static void setAllPossibleIndividualTeacherSchedules()
         {
-            
+            allSchedulePossibilities.Add(new List<possibleSchoolSchedules>());
 
 
             for (int i = 0; i < allTeachers.Count; i++)
@@ -476,9 +476,9 @@ namespace IBClassSorter.Data
 
             
             removeConflicts();
-            setPossibleSchedules(0, new List<TeacherSchedule>());
+            setPossibleSchedules(new object[2] { 0, new List<TeacherSchedule>() });
 
-            runStudentThreads(1);
+            runStudentThreads(10);
             
 
         }
@@ -486,24 +486,16 @@ namespace IBClassSorter.Data
         public static int threadCounter = 0;
         public static void runStudentThreads(int totalThreads)//FIX THE THREAdS SOME 1495 some 1499 the ends change with diff num of threads
         {
-            int total = allSchedulePossibilities.Count;
-            int division = total / totalThreads;
-
-            int prevEnd = 0;
+            
             for (int i = 0; i < totalThreads; i++)
             {
 
                 Thread t = new Thread(new ParameterizedThreadStart(runIndividualStudentThread));
-                if (i == totalThreads - 1)//errors due to integer division
-                {
-                    t.Start(new object[2] { prevEnd, allSchedulePossibilities.Count });
-                }
-                else
-                {
-                    t.Start(new object[2] { prevEnd, prevEnd + division });
-                }
-           
-                prevEnd += division;
+                
+                    t.Start(new object[2] { i, totalThreads });
+               
+                    
+                
             }
 
 
@@ -518,41 +510,57 @@ namespace IBClassSorter.Data
             Array argArray = new object[2];
             argArray = (Array)args;
             int startIndex = (int)argArray.GetValue(0);
-            int endIndex = (int)argArray.GetValue(1);
+            int numThreads = (int)argArray.GetValue(1);
 
             
-            for (int j=startIndex;j<endIndex;j++)
+            for(int i = 0; i <= currentListIndex; i++)
             {
-               // if (isSchoolSchedulePossibleByLoaders(allSchedulePossibilities[j]))
-               // {
+                for (int j = startIndex; j < allSchedulePossibilities[i].Count; j+=numThreads)
+                {
+                    // if (isSchoolSchedulePossibleByLoaders(allSchedulePossibilities[j]))
+                    // {
                     List<studentScheduleOptions> tempPossibleSchedules = new List<studentScheduleOptions>();
-                    if (setAllStudentSchedulesBySchoolSchedule(tempPossibleSchedules, allSchedulePossibilities[j]))
+                    if (setAllStudentSchedulesBySchoolSchedule(tempPossibleSchedules, allSchedulePossibilities[i][j]))
                     {
                         possibleGroupSchedule tempPossibleGroupSchedule = new possibleGroupSchedule
                         {
-                            possibleSchoolSchedule = allSchedulePossibilities[j],
+                            possibleSchoolSchedule = allSchedulePossibilities[i][j],
                             studentSchedules = tempPossibleSchedules
                         };
 
 
                         finalSchedules.Add(tempPossibleGroupSchedule);
-                     //   tmepIndexes.Add(j);
 
-                            //worked-add the possibility
+                        //Console.WriteLine("Student Schedule: " + finalSchedules.Count);
+                        //   tmepIndexes.Add(j);
+
+                        //worked-add the possibility
                     }
                     else
                     {
-                            //failed school schedule didn't work
+                        //failed school schedule didn't work
                     }
-             //   }
+                    //   }
 
-                
+
+                }
             }
+            
             threadCounter+=1;
         }
 
-        public static void setPossibleSchedules(int currentIndex, List<TeacherSchedule> temp)
-        {//add multithREADING
+        public static bool threadsEnabled = false;
+
+        public static int numThreads;
+
+        public static void setPossibleSchedules(object args)
+        {//add multithREADING-takes way too long for more teachers NAH
+
+            Array argArray = new object[2];
+            argArray = (Array)args;
+            int currentIndex = (int)argArray.GetValue(0);
+            List<TeacherSchedule> temp = (List<TeacherSchedule>)argArray.GetValue(1);
+
             List<TeacherSchedule> currentSchedules = new List<TeacherSchedule>();
             foreach(TeacherSchedule schedule in temp)
             {
@@ -560,13 +568,35 @@ namespace IBClassSorter.Data
             }
             if (allTeacherSchedules.Count > currentIndex)
             {
+         //       bool started = false;
                 foreach (TeacherSchedule x in allTeacherSchedules[currentIndex].allSchedules)
                 {
+                    
                     currentSchedules.Add(x);
-                    setPossibleSchedules(currentIndex += 1, currentSchedules);
+                    //if currentIndex==0 then put paramaterized start thread else regular--DOesn't work if the first teacher is ASB-only 1 thread
+                    //bool threadsEnabled=false, if (!threadsEnabled && allTeacherSchedules[currentIndex].allSchedles.Count>5) then start threads and threadsEmabled=true
+             //       if(!threadsEnabled && allTeacherSchedules[currentIndex].allSchedules.Count > 5)
+             //       {
+             //           numThreads = allTeacherSchedules[currentIndex].allSchedules.Count;
+             //           Thread t = new Thread(new ParameterizedThreadStart(setPossibleSchedules));
+             //           t.Name = "T";
+             //           t.Start(new object[2] { currentIndex += 1, currentSchedules });
+
+            //            started = true;
+           //         }
+           //         else
+           //         {
+                        setPossibleSchedules(new object[2] { currentIndex += 1, currentSchedules });
+            //        }
+
                     currentSchedules.Remove(x);
                     currentIndex -= 1;
+
                 }
+             //   if (started)
+             //   {
+            //        threadsEnabled = true;
+             //   }
             }
             else
             {
@@ -582,14 +612,39 @@ namespace IBClassSorter.Data
                     totalSchedulePoints = totalPOWER
                 };
 
+                if (allSchedulePossibilities[currentListIndex].Count > 1000000)
+                {
+                    allSchedulePossibilities.Add(new List<possibleSchoolSchedules>());
+                    currentListIndex += 1;
+                }
+
                 if (isSchoolSchedulePossibleByLoaders(tempSchedyule))
                 {
-                    allSchedulePossibilities.Add(tempSchedyule);
+                    allSchedulePossibilities[currentListIndex].Add(tempSchedyule);
+                  //  Console.WriteLine("School Schedule: " + allSchedulePossibilities[currentListIndex].Count);
                 }
                 
 
                 
             }
+
+            /*
+            if (Thread.CurrentThread.Name == "T")
+            {
+                numThreads -= 1;
+            }
+            else
+            {
+                while (true)
+                {
+                    if (numThreads == 0)
+                    {
+                        return;
+                    }
+                }
+            }
+            */
+
             
         }
         public static TeacherSchedule setRequiredClasses(TeacherModel t)
