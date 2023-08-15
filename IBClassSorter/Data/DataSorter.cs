@@ -478,30 +478,60 @@ namespace IBClassSorter.Data
             removeConflicts();
             setPossibleSchedules(new object[2] { 0, new List<TeacherSchedule>() });
 
-            runStudentThreads(10);
+            runStudentThreads(7);
             
 
         }
 
         public static int threadCounter = 0;
+
+        public static List<possibleGroupSchedule>[] tempThreadHolder;
         public static void runStudentThreads(int totalThreads)//FIX THE THREAdS SOME 1495 some 1499 the ends change with diff num of threads
         {
+            tempThreadHolder=new List<possibleGroupSchedule>[totalThreads];
+            for(int i=0; i<totalThreads; i++)
+            {
+                tempThreadHolder[i]=new List<possibleGroupSchedule>();
+            }
+
+            Thread[] threads=new Thread[totalThreads];
             
             for (int i = 0; i < totalThreads; i++)
             {
 
                 Thread t = new Thread(new ParameterizedThreadStart(runIndividualStudentThread));
-                
-                    t.Start(new object[2] { i, totalThreads });
-               
-                    
-                
+                threads[i] = t;
+
+                t.Start(new object[2] { i, totalThreads });
+
             }
 
+         //   for (int i = 0; i < totalThreads; i++)
+         //   {
+          //      threads[i].Start(new object[2] { i, totalThreads });
+         //   }
 
-            while (threadCounter!=totalThreads)
+
+            while (true)
             {
+                bool allDone = true;
+                for(int i=0; i < threads.Length; i++)
+                {
+                    if (allDone && threads[i].ThreadState == ThreadState.Running)
+                    {
+                        allDone = false;
+                    }
+                }
 
+                if (allDone)
+                {
+                    foreach (List<possibleGroupSchedule> x in tempThreadHolder)
+                    {
+                        finalSchedules.AddRange(x);
+                    }
+                    //combine all the lists since 1 list isnt thread safe
+                    return;
+                }
             }
         }
        // public static List<int> tmepIndexes = new List<int>();
@@ -529,7 +559,7 @@ namespace IBClassSorter.Data
                         };
 
 
-                        finalSchedules.Add(tempPossibleGroupSchedule);
+                        tempThreadHolder[startIndex].Add(tempPossibleGroupSchedule);
 
                         //Console.WriteLine("Student Schedule: " + finalSchedules.Count);
                         //   tmepIndexes.Add(j);
