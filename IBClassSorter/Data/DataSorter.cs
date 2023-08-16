@@ -29,6 +29,7 @@ namespace IBClassSorter.Data
        // public static List<StudentSchedule> allStudentSchedules = new List<StudentSchedule>();
 
         public static List<possibleGroupSchedule> finalSchedules=new List<possibleGroupSchedule>();
+        
 
         public static possibleTeacherSchedules getTeacherSchedulesByTeacherModel(TeacherModel t)
         {
@@ -479,6 +480,8 @@ namespace IBClassSorter.Data
             setPossibleSchedules(new object[2] { 0, new List<TeacherSchedule>() });
 
             runStudentThreads(7);
+
+            finalSchedules.Sort(new possibleGroupSchedule.Sorter());
             
 
         }
@@ -486,12 +489,15 @@ namespace IBClassSorter.Data
         public static int threadCounter = 0;
 
         public static List<possibleGroupSchedule>[] tempThreadHolder;
+        
         public static void runStudentThreads(int totalThreads)//FIX THE THREAdS SOME 1495 some 1499 the ends change with diff num of threads
         {
             tempThreadHolder=new List<possibleGroupSchedule>[totalThreads];
-            for(int i=0; i<totalThreads; i++)
+            
+            for (int i=0; i<totalThreads; i++)
             {
                 tempThreadHolder[i]=new List<possibleGroupSchedule>();
+                
             }
 
             Thread[] threads=new Thread[totalThreads];
@@ -529,6 +535,7 @@ namespace IBClassSorter.Data
                     {
                         finalSchedules.AddRange(x);
                     }
+                    
                     //combine all the lists since 1 list isnt thread safe
                     return;
                 }
@@ -558,8 +565,10 @@ namespace IBClassSorter.Data
                             studentSchedules = tempPossibleSchedules
                         };
 
-
+                       
                         tempThreadHolder[startIndex].Add(tempPossibleGroupSchedule);
+                        
+                        
 
                         //Console.WriteLine("Student Schedule: " + finalSchedules.Count);
                         //   tmepIndexes.Add(j);
@@ -923,7 +932,14 @@ namespace IBClassSorter.Data
         {
             public List<studentScheduleOptions> studentSchedules { get; set; }
             public possibleSchoolSchedules possibleSchoolSchedule { get; set; }
-           
+
+            public class Sorter : IComparer<possibleGroupSchedule>
+            {
+                public int Compare(possibleGroupSchedule x, possibleGroupSchedule y)
+                {
+                    return y.possibleSchoolSchedule.totalSchedulePoints.CompareTo(x.possibleSchoolSchedule.totalSchedulePoints);
+                }
+            }
 
         }
 

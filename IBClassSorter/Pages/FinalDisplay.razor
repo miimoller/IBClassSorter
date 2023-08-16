@@ -1,6 +1,283 @@
 ﻿@page "/scheduleDisplay"
+@using Data
 <h3>FinalDisplay</h3>
 
+<RadzenText>Total Preference Power: @currentScheduleDisplay.possibleSchoolSchedule.totalSchedulePoints</RadzenText>
+
+<RadzenText>Teacher Schedules</RadzenText>
+<RadzenDataGrid Data="currentScheduleDisplay.possibleSchoolSchedule.allTeacherSchedules" TItem="TeacherSchedule">
+    <Columns>
+        <RadzenDataGridColumn Title="Name" TItem="TeacherSchedule" Property="teacher.name"/>
+        
+        <RadzenDataGridColumn Title="Period 0" TItem="TeacherSchedule">
+            <Template Context="data">
+                @if(data.periods[0]==null){
+                    <p style="white-space:pre-wrap">@emptyPeriodMsg</p>
+                }else{
+                    <p style="white-space:pre-wrap">@data.periods[0].course.name</p>
+                    
+                }
+                
+            </Template>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn Title="Period 1" TItem="TeacherSchedule">
+            <Template Context="data">
+                @if (data.periods[1] == null)
+                {
+                    <p style="white-space:pre-wrap">@emptyPeriodMsg</p>
+                }
+                else
+                {
+                    <p style="white-space:pre-wrap">@data.periods[1].course.name</p>
+
+                }
+            </Template>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn Title="Period 2" TItem="TeacherSchedule">
+            <Template Context="data">
+               @if(data.periods[2]==null){
+                    <p style="white-space:pre-wrap">@emptyPeriodMsg</p>
+                }else{
+                    <p style="white-space:pre-wrap">@data.periods[2].course.name</p>
+                    
+                }
+            </Template>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn Title="Period 3" TItem="TeacherSchedule">
+            <Template Context="data">
+                @if(data.periods[3]==null){
+                    <p style="white-space:pre-wrap">@emptyPeriodMsg</p>
+                }else{
+                    <p style="white-space:pre-wrap">@data.periods[3].course.name</p>
+                    
+                }
+            </Template>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn Title="Period 4" TItem="TeacherSchedule">
+            <Template Context="data">
+                @if(data.periods[4]==null){
+                    <p style="white-space:pre-wrap">@emptyPeriodMsg</p>
+                }else{
+                    <p style="white-space:pre-wrap">@data.periods[4].course.name</p>
+                    
+                }
+            </Template>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn Title="Period 5" TItem="TeacherSchedule">
+            <Template Context="data">
+                @if (data.periods[5] == null)
+                {
+                    <p style="white-space:pre-wrap">@emptyPeriodMsg</p>
+                }
+                else
+                {
+                    <p style="white-space:pre-wrap">@data.periods[5].course.name</p>
+
+                }
+            </Template>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn Title="Period 6" TItem="TeacherSchedule">
+            <Template Context="data">
+                @if (data.periods[6] == null)
+                {
+                    <p style="white-space:pre-wrap">@emptyPeriodMsg</p>
+                }
+                else
+                {
+                    <p style="white-space:pre-wrap">@data.periods[6].course.name</p>
+
+                }
+            </Template>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn Title="Period 7" TItem="TeacherSchedule">
+            <Template Context="data">
+                @if(data.periods[7]==null){
+                    <p style="white-space:pre-wrap">@emptyPeriodMsg</p>
+                }else{
+                    <p style="white-space:pre-wrap">@data.periods[7].course.name</p>
+                    
+                }
+            </Template>
+        </RadzenDataGridColumn>
+        
+
+
+        
+    </Columns>
+</RadzenDataGrid>
+
+
+<RadzenText>Student Schedules</RadzenText>
+<RadzenDataGrid Data="currentScheduleDisplay.studentSchedules" TItem="DataSorter.studentScheduleOptions">
+    <Columns>
+        <RadzenDataGridColumn Title="Name" Width="80px" TItem="DataSorter.studentScheduleOptions" Property="student.name" />
+
+        <RadzenDataGridColumn Title="Possible Schedules" TItem="DataSorter.studentScheduleOptions">
+            
+            <Template Context="data">
+                <RadzenDataGrid Data=@data.possibleSchedules TItem="StudentSchedule">
+                    <Columns>
+                        <RadzenDataGridColumn TItem="StudentSchedule" Title="Total Failed Electives" Property="numElectivesFailed"/>
+
+                       <RadzenDataGridColumn Title="Period 0" TItem="StudentSchedule">
+                           <Template Context="studentData">
+                                @if(studentData.periods[0]==null){
+                                    <p style="white-space:pre-wrap">@emptyStudentMsg</p>
+                                }else{
+                                    <p style="white-space:pre-wrap">@studentData.periods[0].course.name</p>
+                    
+                                }
+                           </Template>
+                       </RadzenDataGridColumn>
+
+                        <RadzenDataGridColumn Title="Period 1" TItem="StudentSchedule">
+                            <Template Context="studentData">
+                                @if (studentData.periods[1] == null)
+                                {
+                                    <p style="white-space:pre-wrap">@emptyStudentMsg</p>
+                                }
+                                else
+                                {
+                                    <p style="white-space:pre-wrap">@studentData.periods[1].course.name</p>
+
+                                }
+                            </Template>
+                        </RadzenDataGridColumn>
+
+                        <RadzenDataGridColumn Title="Period 2" TItem="StudentSchedule">
+                            <Template Context="studentData">
+                                @if (studentData.periods[2] == null)
+                                {
+                                    <p style="white-space:pre-wrap">@emptyStudentMsg</p>
+                                }
+                                else
+                                {
+                                    <p style="white-space:pre-wrap">@studentData.periods[2].course.name</p>
+
+                                }
+                            </Template>
+                        </RadzenDataGridColumn>
+
+                        <RadzenDataGridColumn Title="Period 3" TItem="StudentSchedule">
+                            <Template Context="studentData">
+                                @if (studentData.periods[3] == null)
+                                {
+                                    <p style="white-space:pre-wrap">@emptyStudentMsg</p>
+                                }
+                                else
+                                {
+                                    <p style="white-space:pre-wrap">@studentData.periods[3].course.name</p>
+
+                                }
+                            </Template>
+                        </RadzenDataGridColumn>
+
+                        <RadzenDataGridColumn Title="Period 4" TItem="StudentSchedule">
+                            <Template Context="studentData">
+                                @if (studentData.periods[4] == null)
+                                {
+                                    <p style="white-space:pre-wrap">@emptyStudentMsg</p>
+                                }
+                                else
+                                {
+                                    <p style="white-space:pre-wrap">@studentData.periods[4].course.name</p>
+
+                                }
+                            </Template>
+                        </RadzenDataGridColumn>
+
+                        <RadzenDataGridColumn Title="Period 5" TItem="StudentSchedule">
+                            <Template Context="studentData">
+                                @if (studentData.periods[5] == null)
+                                {
+                                    <p style="white-space:pre-wrap">@emptyStudentMsg</p>
+                                }
+                                else
+                                {
+                                    <p style="white-space:pre-wrap">@studentData.periods[5].course.name</p>
+
+                                }
+                            </Template>
+                        </RadzenDataGridColumn>
+
+                        <RadzenDataGridColumn Title="Period 6" TItem="StudentSchedule">
+                            <Template Context="studentData">
+                                @if (studentData.periods[6] == null)
+                                {
+                                    <p style="white-space:pre-wrap">@emptyStudentMsg</p>
+                                }
+                                else
+                                {
+                                    <p style="white-space:pre-wrap">@studentData.periods[6].course.name</p>
+
+                                }
+                            </Template>
+                        </RadzenDataGridColumn>
+
+                        <RadzenDataGridColumn Title="Period 7" TItem="StudentSchedule">
+                            <Template Context="studentData">
+                                @if (studentData.periods[7] == null)
+                                {
+                                    <p style="white-space:pre-wrap">@emptyStudentMsg</p>
+                                }
+                                else
+                                {
+                                    <p style="white-space:pre-wrap">@studentData.periods[7].course.name</p>
+
+                                }
+                            </Template>
+                        </RadzenDataGridColumn>
+                    </Columns>
+
+                </RadzenDataGrid>
+               
+
+            </Template>
+        </RadzenDataGridColumn>
+
+    </Columns>
+</RadzenDataGrid>
+
+
+
+
+<RadzenPager ShowPagingSummary="true" PagingSummaryFormat="@pagingSummaryFormat" HorizontalAlign="HorizontalAlign.Right" PageSize="1" Count="count" PageChanged="@PageChanged" />
+
 @code {
+    string emptyPeriodMsg = "Empty/Non-IB Class";
+    string emptyStudentMsg = "Add Elective/Free Period";
+
+    string pagingSummaryFormat = "Displaying page {0} of {2}";
+    int count=0;
+
+    public DataSorter.possibleGroupSchedule currentScheduleDisplay;
+
+    protected override void OnInitialized()
+    {
+        DataSorter.setAllPossibleIndividualTeacherSchedules();
+        count = DataSorter.finalSchedules.Count;
+        if(DataSorter.finalSchedules.Count!=0){
+            PageChanged(new PagerEventArgs
+                {
+                    PageIndex = 0
+                });
+            
+        }else{
+            //failure
+        }
+
+    }
+
+    void PageChanged(PagerEventArgs args)
+    {
+        currentScheduleDisplay = DataSorter.finalSchedules[args.PageIndex];
+    }
 
 }
