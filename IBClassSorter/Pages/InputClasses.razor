@@ -13,7 +13,7 @@
     {
         int currentIndex = i;
 
-        <RadzenRow>
+        <RadzenRow class="rz-background-color-info-lighter rz-color-info rz-border-radius-1 rz-mt-2">
 
 
             <RadzenTextBox Placeholder="Enter class Name" Change="@(args=> updateClassName(args, currentIndex))"></RadzenTextBox>
@@ -91,7 +91,7 @@
                 }
             }
         }
-        
+
 
         getClassTeachersByIndex(classIndex).teachers[teacherIndex].sevenAvail = seven;
     }
@@ -118,7 +118,7 @@
                     numClasses=0,
                     zeroAvail=false,
                     sevenAvail=false
-                    
+
                 });
         }
         if (getClassTeachersByIndex(index) != null)
@@ -166,11 +166,13 @@
 
     public void updateClassName(string name, int index){
 
-        if (tempClassNames.Count<=index){
-            tempClassNames.Add(name);
-        }else{
-            tempClassNames[index] = name;
+        tempClassNames.EnsureCapacity(index+1);
+        for(int i=tempClassNames.Count;i<tempClassNames.Capacity;i++){
+            tempClassNames.Add(null);
         }
+        tempClassNames[index] = name;
+        
+        
 
 
 

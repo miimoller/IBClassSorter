@@ -6,7 +6,7 @@
 <RadzenNumeric TValue="int" @bind-Value="totalStudents"></RadzenNumeric>
 @for(int i=0;i<totalStudents;i++){
     int currentIndex = i;
-    <RadzenRow>
+    <RadzenRow class="rz-my-2">
         <RadzenTextBox Placeholder="Enter Student Name" Change="@(args=> updateStudentList(args, currentIndex))"></RadzenTextBox>
         <RadzenDropDown Change="@(args=> updateStudentList(args, currentIndex))" TextProperty="name" Data="@allCourses" Multiple="true" AllowSelectAll="false" TValue="CourseModel" Disabled="@checkStudentDisabled(currentIndex)"></RadzenDropDown>
     </RadzenRow>
@@ -14,17 +14,25 @@
 
 <RadzenButton Click="@enter">Enter</RadzenButton>
 
+<RadzenAlert AlertStyle="AlertStyle.Info" ShowIcon="false" Variant="Variant.Flat" Shade="Shade.Lighter" AllowClose="false" Visible=@isVisible>
+    <RadzenText>Please Wait: Calculating Possibilities (Will likely take a long time)</RadzenText>
+    <RadzenText>If doesn't eventually load, RAM overloaded by permutations, retry with more required class placements</RadzenText>
+</RadzenAlert>
+
 
 @code {
     public int totalStudents;
     public List<StudentModel> allStudents;
     public List<CourseModel> allCourses;
 
+    bool isVisible = false;
+
     public bool checkStudentDisabled(int index){
         return getStudentByIndex(index) == null;
     }
 
     public void enter(){
+        isVisible = true;
         DataSorter.allStudents = allStudents;
         
         NavigationManager.NavigateTo("scheduleDisplay");

@@ -30,6 +30,7 @@ namespace IBClassSorter.Data
 
         public static List<possibleGroupSchedule> finalSchedules=new List<possibleGroupSchedule>();
         
+        
 
         public static possibleTeacherSchedules getTeacherSchedulesByTeacherModel(TeacherModel t)
         {
@@ -79,17 +80,52 @@ namespace IBClassSorter.Data
             return -1;
         }
 
+        public static (int first, int second) getPeriod2OfClassByTeacherSchedule(TeacherSchedule t, ClassModel c)
+        {
+            int one = -1;
+            int two = -1;
+            for (int i = 0; i < t.periods.Length; i++)
+            {
+                if (t.periods[i] != null && t.periods[i].id == c.id)
+                {
+                    if (one == -1)
+                    {
+                        one = i;
+                    }
+                    else
+                    {
+                        two = i;
+                    }
+                    
+                }
+            }
+            return (one,two);
+        }
+
+
+
         public static bool doesStudentHaveCourses(CourseModel x, CourseModel y)
         {
             foreach(StudentModel s in allStudents)
             {
-                List<int> courseIds = new List<int>();
-                foreach(CourseModel c in s.courses)
-                {
-                    courseIds.Add(c.id);
-                }
+                List<int> courseIds = s.courses.Select(s=>s.id).ToList();
 
                 if(courseIds.Contains(x.id) && courseIds.Contains(y.id))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public static bool doesStudentHaveCourses(CourseModel x, CourseModel y, CourseModel z)
+        {
+            foreach (StudentModel s in allStudents)
+            {
+                List<int> courseIds = s.courses.Select(s => s.id).ToList();
+
+                if (courseIds.Contains(x.id) && courseIds.Contains(y.id) && courseIds.Contains(z.id))
                 {
                     return true;
                 }
@@ -125,6 +161,77 @@ namespace IBClassSorter.Data
             }
 
             return true;
+        }
+
+        public static bool isSchoolSchedulePossibleByDoubleLoaders(possibleSchoolSchedules s)
+        {
+            List<ClassModel> singleLoaders = findFlexibleLoadBearingClasses();
+            List<ClassModel> doubleLoaders = findDoubleLoadBearningClasses();
+
+            foreach(ClassModel x in doubleLoaders) //ex: hota=5 & 6, physics2=5, BC=6 then fail
+            {
+                int periodX1;
+                int periodX2;
+                bool isXElective;
+                if (x.numTimesTeaching == 2)//case where 1 teacher teaching 2 classes
+                {
+                    (int, int) periods = getPeriod2OfClassByTeacherSchedule(getTeacherScheduleBySchoolSchedule(x.teacher, s), x);
+                    periodX1 = periods.Item1;
+                    periodX2 = periods.Item2;
+                    isXElective = getClassPreferences(x).isElective;
+                }
+                else//case where 2 teachers 1 class each
+                {
+                    periodX1 = getPeriodOfClassByTeacherSchedule(getTeacherScheduleBySchoolSchedule(x.course.teachers[0], s), x);
+                    periodX2 = getPeriodOfClassByTeacherSchedule(getTeacherScheduleBySchoolSchedule(x.course.teachers[1], s), x);
+                    isXElective = getClassPreferences(x).isElective;
+
+                }
+
+                bool x1Filled = false;
+                CourseModel x1Filler = null;
+
+                bool x2Filled = false;
+                CourseModel x2Filler = null;
+                foreach(ClassModel y in singleLoaders)
+                {
+                    int periodY = getPeriodOfClassByTeacherSchedule(getTeacherScheduleBySchoolSchedule(y.teacher, s), y);
+                    bool isYElective = getClassPreferences(y).isElective;
+                    if (!isXElective && !isYElective && periodX1 != -1 && periodY!=-1 && periodX1 == periodY)
+                    {
+                        x1Filled = true;
+                        x1Filler = y.course;
+                    }
+                    if (!isXElective && !isYElective && periodX1 != -1 && periodY != -1 && periodX2 == periodY)
+                    {
+                        x2Filled = true;
+                        x2Filler = y.course;
+                    }
+
+                }
+
+                if (x1Filled && x2Filled && doesStudentHaveCourses(x1Filler, x2Filler, x.course)){
+                    return false;
+                }
+                //check if x1 and x2 both have a loadbearer on them and student has all 3
+            }
+
+            return true;
+        }
+
+        public static List<ClassModel> findDoubleLoadBearningClasses()
+        {
+            List<ClassModel> loadBearingClasses = new List<ClassModel>();
+            //the classes where there is only one spot (ex:ASB)
+            foreach (ClassModel x in allClasses)//1 teacher 2 classes or 2 teachers 1 class each
+            {
+                if ((x.course.teachers.Count == 1 && x.numTimesTeaching == 2) || (x.course.teachers.Count == 2 && getClassModelByCourseAndTeacher(x.course, x.course.teachers[0]).numTimesTeaching==1 && getClassModelByCourseAndTeacher(x.course, x.course.teachers[1]).numTimesTeaching == 1))
+                {
+                    loadBearingClasses.Add(x);
+                }
+            }
+
+            return loadBearingClasses;
         }
 
         public static List<ClassModel> findFlexibleLoadBearingClasses()
@@ -479,7 +586,11 @@ namespace IBClassSorter.Data
             removeConflicts();
             setPossibleSchedules(new object[2] { 0, new List<TeacherSchedule>() });
 
-            runStudentThreads(7);
+            runStudentThreads(20);
+
+            //Clear up the ram
+            allTeacherSchedules = null;
+            allSchedulePossibilities = null;
 
             finalSchedules.Sort(new possibleGroupSchedule.Sorter());
             
@@ -657,7 +768,7 @@ namespace IBClassSorter.Data
                     currentListIndex += 1;
                 }
 
-                if (isSchoolSchedulePossibleByLoaders(tempSchedyule))
+                if (isSchoolSchedulePossibleByLoaders(tempSchedyule) && isSchoolSchedulePossibleByDoubleLoaders(tempSchedyule))
                 {
                     allSchedulePossibilities[currentListIndex].Add(tempSchedyule);
                   //  Console.WriteLine("School Schedule: " + allSchedulePossibilities[currentListIndex].Count);

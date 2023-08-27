@@ -2,10 +2,13 @@
 @using Data
 <h3>FinalDisplay</h3>
 
-<RadzenText>Total Preference Power: @currentScheduleDisplay.possibleSchoolSchedule.totalSchedulePoints</RadzenText>
+@if(currentScheduleDisplay!=null){
+        <RadzenText >Total Preference Power: @currentScheduleDisplay.possibleSchoolSchedule.totalSchedulePoints</RadzenText>
+}
+
 
 <RadzenText>Teacher Schedules</RadzenText>
-<RadzenDataGrid Data="currentScheduleDisplay.possibleSchoolSchedule.allTeacherSchedules" TItem="TeacherSchedule">
+<RadzenDataGrid Data="currentScheduleDisplay.possibleSchoolSchedule.allTeacherSchedules" TItem="TeacherSchedule" IsLoading="@isLoading">
     <Columns>
         <RadzenDataGridColumn Title="Name" TItem="TeacherSchedule" Property="teacher.name"/>
         
@@ -115,7 +118,7 @@
 
 
 <RadzenText>Student Schedules</RadzenText>
-<RadzenDataGrid Data="currentScheduleDisplay.studentSchedules" TItem="DataSorter.studentScheduleOptions">
+<RadzenDataGrid Data="currentScheduleDisplay.studentSchedules" TItem="DataSorter.studentScheduleOptions" IsLoading="@isLoading">
     <Columns>
         <RadzenDataGridColumn Title="Name" Width="80px" TItem="DataSorter.studentScheduleOptions" Property="student.name" />
 
@@ -131,7 +134,7 @@
                                 @if(studentData.periods[0]==null){
                                     <p style="white-space:pre-wrap">@emptyStudentMsg</p>
                                 }else{
-                                    <p style="white-space:pre-wrap">@studentData.periods[0].course.name</p>
+                                    <p style="white-space:pre-wrap">@studentData.periods[0].teacher.name: @studentData.periods[0].course.name</p>
                     
                                 }
                            </Template>
@@ -145,7 +148,7 @@
                                 }
                                 else
                                 {
-                                    <p style="white-space:pre-wrap">@studentData.periods[1].course.name</p>
+                                    <p style="white-space:pre-wrap">@studentData.periods[1].teacher.name: @studentData.periods[1].course.name</p>
 
                                 }
                             </Template>
@@ -159,7 +162,7 @@
                                 }
                                 else
                                 {
-                                    <p style="white-space:pre-wrap">@studentData.periods[2].course.name</p>
+                                    <p style="white-space:pre-wrap">@studentData.periods[2].teacher.name: @studentData.periods[2].course.name</p>
 
                                 }
                             </Template>
@@ -173,7 +176,7 @@
                                 }
                                 else
                                 {
-                                    <p style="white-space:pre-wrap">@studentData.periods[3].course.name</p>
+                                    <p style="white-space:pre-wrap">@studentData.periods[3].teacher.name: @studentData.periods[3].course.name</p>
 
                                 }
                             </Template>
@@ -187,7 +190,7 @@
                                 }
                                 else
                                 {
-                                    <p style="white-space:pre-wrap">@studentData.periods[4].course.name</p>
+                                    <p style="white-space:pre-wrap">@studentData.periods[4].teacher.name: @studentData.periods[4].course.name</p>
 
                                 }
                             </Template>
@@ -201,7 +204,7 @@
                                 }
                                 else
                                 {
-                                    <p style="white-space:pre-wrap">@studentData.periods[5].course.name</p>
+                                    <p style="white-space:pre-wrap">@studentData.periods[5].teacher.name: @studentData.periods[5].course.name</p>
 
                                 }
                             </Template>
@@ -215,7 +218,7 @@
                                 }
                                 else
                                 {
-                                    <p style="white-space:pre-wrap">@studentData.periods[6].course.name</p>
+                                    <p style="white-space:pre-wrap">@studentData.periods[6].teacher.name: @studentData.periods[6].course.name</p>
 
                                 }
                             </Template>
@@ -229,7 +232,7 @@
                                 }
                                 else
                                 {
-                                    <p style="white-space:pre-wrap">@studentData.periods[7].course.name</p>
+                                    <p style="white-space:pre-wrap">@studentData.periods[7].teacher.name: @studentData.periods[7].course.name</p>
 
                                 }
                             </Template>
@@ -251,28 +254,35 @@
 <RadzenPager ShowPagingSummary="true" PagingSummaryFormat="@pagingSummaryFormat" HorizontalAlign="HorizontalAlign.Right" PageSize="1" Count="count" PageChanged="@PageChanged" />
 
 @code {
-    string emptyPeriodMsg = "Empty/Non-IB Class";
-    string emptyStudentMsg = "Add Elective/Free Period";
+    string emptyPeriodMsg = "Empty or Non-IB Class";
+    string emptyStudentMsg = "Add Elective or Empty";
 
     string pagingSummaryFormat = "Displaying page {0} of {2}";
     int count=0;
 
+    bool isLoading = true;
     public DataSorter.possibleGroupSchedule currentScheduleDisplay;
+
+
 
     protected override void OnInitialized()
     {
+        base.OnInitialized();
+        isLoading = true;
         DataSorter.setAllPossibleIndividualTeacherSchedules();
+
         count = DataSorter.finalSchedules.Count;
         if(DataSorter.finalSchedules.Count!=0){
             PageChanged(new PagerEventArgs
                 {
                     PageIndex = 0
                 });
-            
+
         }else{
             //failure
         }
 
+        isLoading = false;
     }
 
     void PageChanged(PagerEventArgs args)

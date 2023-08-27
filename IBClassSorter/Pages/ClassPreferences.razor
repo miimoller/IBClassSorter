@@ -7,8 +7,8 @@
 
 @for(int i=0;i<allClasses.Count;i++){
     int currentIndex = i;
-    
-    <RadzenRow>
+
+    <RadzenRow class="rz-background-color-info-lighter rz-color-info rz-border-radius-1 rz-mt-2">
         <RadzenLabel>@getClassInfo(currentIndex)</RadzenLabel>
         <RadzenCheckBoxList Value=@allPeriodPreferences[currentIndex].preferedPeriods Change=@(args=>updatePrefPeriods(currentIndex,args)) TValue="int">
             <Items>
@@ -32,6 +32,8 @@
         <RadzenLabel>Is non-IB (given lower importance)</RadzenLabel>
         <RadzenCheckBox @bind-Value="@allPeriodPreferences[currentIndex].isElective"></RadzenCheckBox>
     </RadzenRow>
+
+    
 }
 <RadzenButton Click="enter">Enter </RadzenButton>
 @code {
