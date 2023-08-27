@@ -269,7 +269,7 @@
     {
         base.OnInitialized();
         isLoading = true;
-        DataSorter.setAllPossibleIndividualTeacherSchedules();
+        DataSorter.setAllPossibleIndividualTeacherSchedules(200);
 
         count = DataSorter.finalSchedules.Count;
         if(DataSorter.finalSchedules.Count!=0){
