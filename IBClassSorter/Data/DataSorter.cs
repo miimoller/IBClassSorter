@@ -564,6 +564,11 @@ namespace IBClassSorter.Data
         public static void setAllPossibleIndividualTeacherSchedules(int totalThreads)
         {
 
+            stillUnderMax = true;
+            allTeacherSchedules.Clear();
+            finalSchedules.Clear();
+
+
             setUpThreads(totalThreads);
 
             for (int i = 0; i < allTeachers.Count; i++)
@@ -648,6 +653,8 @@ namespace IBClassSorter.Data
             }
         }
 
+        public static bool stillUnderMax = true;
+
         public static void runStudentThreads(possibleSchoolSchedules s)//FIX THE THREAdS SOME 1495 some 1499 the ends change with diff num of threads
         {
             while (true)
@@ -722,23 +729,39 @@ namespace IBClassSorter.Data
            
                     // if (isSchoolSchedulePossibleByLoaders(allSchedulePossibilities[j]))
                     // {
-                    List<studentScheduleOptions> tempPossibleSchedules = new List<studentScheduleOptions>();
-                    if (setAllStudentSchedulesBySchoolSchedule(tempPossibleSchedules, currentSchedulePossibility))
-                    {
-                        possibleGroupSchedule tempPossibleGroupSchedule = new possibleGroupSchedule
-                        {
-                            possibleSchoolSchedule = currentSchedulePossibility,
-                            studentSchedules = tempPossibleSchedules
-                        };
+            List<studentScheduleOptions> tempPossibleSchedules = new List<studentScheduleOptions>();
+            if (setAllStudentSchedulesBySchoolSchedule(tempPossibleSchedules, currentSchedulePossibility))
+            {
+             possibleGroupSchedule tempPossibleGroupSchedule = new possibleGroupSchedule
+              {
+                   possibleSchoolSchedule = currentSchedulePossibility,
+                   studentSchedules = tempPossibleSchedules
+              };
 
-                       
-                        tempThreadHolder[startIndex].Add(tempPossibleGroupSchedule);
-                    }
+
+                    
+              tempThreadHolder[startIndex].Add(tempPossibleGroupSchedule);
+                if (caclTotalSchedules() > 10000)
+                {
+                    stillUnderMax = false;
+                    //TOO MANY***********************************************************************************************************************
+                }
+            }
                     else
                     {
                     }
             
             threads[startIndex] = new Thread(new ParameterizedThreadStart(runIndividualStudentThread));
+        }
+
+        public static int caclTotalSchedules()
+        {
+            int totalSchedules = 0;
+            foreach(List<possibleGroupSchedule> x in tempThreadHolder)
+            {
+                totalSchedules += x.Count;
+            }
+            return totalSchedules;
         }
 
         public static bool threadsEnabled = false;
@@ -747,50 +770,54 @@ namespace IBClassSorter.Data
 
         public static void setPossibleSchedules(object args)
         {
-
-            Array argArray = new object[2];
-            argArray = (Array)args;
-            int currentIndex = (int)argArray.GetValue(0);
-            List<TeacherSchedule> temp = (List<TeacherSchedule>)argArray.GetValue(1);
-
-            List<TeacherSchedule> currentSchedules = new List<TeacherSchedule>();
-            foreach(TeacherSchedule schedule in temp)
+            if (stillUnderMax)
             {
-                currentSchedules.Add(TeacherSchedule.duplicate(schedule));
-            }
-            if (allTeacherSchedules.Count > currentIndex)
-            {
-                foreach (TeacherSchedule x in allTeacherSchedules[currentIndex].allSchedules)
+                Array argArray = new object[2];
+                argArray = (Array)args;
+                int currentIndex = (int)argArray.GetValue(0);
+                List<TeacherSchedule> temp = (List<TeacherSchedule>)argArray.GetValue(1);
+
+                List<TeacherSchedule> currentSchedules = new List<TeacherSchedule>();
+                foreach (TeacherSchedule schedule in temp)
                 {
-                    currentSchedules.Add(x);
-                    setPossibleSchedules(new object[2] { currentIndex += 1, currentSchedules });
+                    currentSchedules.Add(TeacherSchedule.duplicate(schedule));
+                }
+                if (allTeacherSchedules.Count > currentIndex)
+                {
+                    foreach (TeacherSchedule x in allTeacherSchedules[currentIndex].allSchedules)
+                    {
+                        currentSchedules.Add(x);
+                        setPossibleSchedules(new object[2] { currentIndex += 1, currentSchedules });
 
-                    currentSchedules.Remove(x);
-                    currentIndex -= 1;
+                        currentSchedules.Remove(x);
+                        currentIndex -= 1;
+                    }
+                }
+                else
+                {
+                    int totalPOWER = 0;
+                    foreach (TeacherSchedule x in currentSchedules)
+                    {
+                        totalPOWER += x.preferencePower;
+                    }
+                    possibleSchoolSchedules tempSchedyule = new possibleSchoolSchedules
+                    {
+                        id = possibleSchoolSchedules.idCounter++,
+                        allTeacherSchedules = currentSchedules,
+                        totalSchedulePoints = totalPOWER
+                    };
+
+
+
+                    if (stillUnderMax && isSchoolSchedulePossibleByLoaders(tempSchedyule) && isSchoolSchedulePossibleByDoubleLoaders(tempSchedyule))
+                    {
+                        runStudentThreads(tempSchedyule);
+                        //  Console.WriteLine("School Schedule: " + allSchedulePossibilities[currentListIndex].Count);
+                    }
                 }
             }
-            else
-            {
-                int totalPOWER = 0;
-                foreach(TeacherSchedule x in currentSchedules)
-                {
-                    totalPOWER += x.preferencePower;
-                }
-                possibleSchoolSchedules tempSchedyule = new possibleSchoolSchedules
-                {
-                    id = possibleSchoolSchedules.idCounter++,
-                    allTeacherSchedules = currentSchedules,
-                    totalSchedulePoints = totalPOWER
-                };
 
-                
-
-                if (isSchoolSchedulePossibleByLoaders(tempSchedyule) && isSchoolSchedulePossibleByDoubleLoaders(tempSchedyule))
-                {
-                    runStudentThreads(tempSchedyule);
-                  //  Console.WriteLine("School Schedule: " + allSchedulePossibilities[currentListIndex].Count);
-                }
-            }
+            
             
         }
         public static TeacherSchedule setRequiredClasses(TeacherModel t)

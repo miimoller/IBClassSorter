@@ -3,6 +3,11 @@
 @using IBClassSorter.Data
 <h3>InputStudents</h3>
 
+<RadzenAlert AlertStyle="AlertStyle.Info" ShowIcon="false" Variant="Variant.Flat" Shade="Shade.Lighter" AllowClose="false" Visible=@isVisible>
+    <RadzenText>Please Wait: Calculating Possibilities (Will likely take a long time)</RadzenText>
+   
+</RadzenAlert>
+
 <RadzenNumeric TValue="int" @bind-Value="totalStudents"></RadzenNumeric>
 @for(int i=0;i<totalStudents;i++){
     int currentIndex = i;
@@ -14,10 +19,7 @@
 
 <RadzenButton Click="@enter">Enter</RadzenButton>
 
-<RadzenAlert AlertStyle="AlertStyle.Info" ShowIcon="false" Variant="Variant.Flat" Shade="Shade.Lighter" AllowClose="false" Visible=@isVisible>
-    <RadzenText>Please Wait: Calculating Possibilities (Will likely take a long time)</RadzenText>
-    <RadzenText>If doesn't eventually load, RAM overloaded by permutations, retry with more required class placements</RadzenText>
-</RadzenAlert>
+
 
 
 @code {

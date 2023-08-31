@@ -1,0 +1,117 @@
+﻿@page "/updateClassPref"
+
+@inject NavigationManager NavigationManager
+@using IBClassSorter.Data
+
+<h3>ClassPreferences</h3>
+
+<RadzenAlert AlertStyle="AlertStyle.Info" ShowIcon="false" Variant="Variant.Flat" Shade="Shade.Lighter" AllowClose="false" Visible=@isVisible>
+    <RadzenText>Please Wait: Calculating Possibilities (Will likely take a long time)</RadzenText>
+   
+</RadzenAlert>
+
+@for (int i = 0; i < allPeriodPreferences.Count; i++)
+{
+    int currentIndex = i;
+
+    <RadzenRow class="rz-background-color-info-lighter rz-color-info rz-border-radius-1 rz-mt-2">
+        <RadzenLabel>@getClassInfo(currentIndex)</RadzenLabel>
+        <RadzenCheckBoxList Value=@allPeriodPreferences[currentIndex].preferedPeriods Change=@(args=>updatePrefPeriods(currentIndex,args)) TValue="int">
+            <Items>
+                <RadzenCheckBoxListItem Text="0" Value=0 Disabled="true" />
+                <RadzenCheckBoxListItem Text="1" Value=1 Disabled="@oneDis" />
+                <RadzenCheckBoxListItem Text="2" Value=2 Disabled="@twoDis" />
+                <RadzenCheckBoxListItem Text="3" Value=3 Disabled="@threeDis" />
+                <RadzenCheckBoxListItem Text="4" Value=4 Disabled="@fourDis" />
+                <RadzenCheckBoxListItem Text="5" Value=5 Disabled="@fiveDis" />
+                <RadzenCheckBoxListItem Text="6" Value=6 Disabled="@sixDis" />
+                <RadzenCheckBoxListItem Text="7" Value=7 Disabled="true" />
+            </Items>
+        </RadzenCheckBoxList>
+        <RadzenRadioButtonList TValue="int" Change=@(args=>updateDontCareStat(currentIndex, args)) @bind-Value="@allPeriodPreferences[currentIndex].preferencePower">
+            <Items>
+                <RadzenRadioButtonListItem Text="Required Placement" Value="1" />
+                <RadzenRadioButtonListItem Text="Highly-Prefered Placement" Value="2" />
+                <RadzenRadioButtonListItem Text="Don't Care" Value="3" />
+            </Items>
+        </RadzenRadioButtonList>
+        <RadzenLabel>Is non-IB (given lower importance)</RadzenLabel>
+        <RadzenCheckBox @bind-Value="@allPeriodPreferences[currentIndex].isElective"></RadzenCheckBox>
+    </RadzenRow>
+
+
+}
+<RadzenButton Click="enter">Enter </RadzenButton>
+@code {
+    public bool isVisible = false;
+
+    public List<Data.ClassPreferences> allPeriodPreferences = new List<Data.ClassPreferences>();
+
+
+    public bool oneDis = false;
+    public bool twoDis = false;
+    public bool threeDis = false;
+    public bool fourDis = false;
+    public bool fiveDis = false;
+    public bool sixDis = false;
+
+    public string getClassInfo(int index)
+    {
+
+        return allPeriodPreferences[index].classModel.course.name + ": " + allPeriodPreferences[index].classModel.teacher.name;
+    }
+
+    public void updateDontCareStat(int index, int id)
+    {
+        if (id == 3)
+        {
+            allPeriodPreferences[index].preferedPeriods.Clear();
+            oneDis = true;
+            twoDis = true;
+            threeDis = true;
+            fourDis = true;
+            fiveDis = true;
+            sixDis = true;
+
+        }
+        else
+        {
+            oneDis = false;
+            twoDis = false;
+            threeDis = false;
+            fourDis = false;
+            fiveDis = false;
+            sixDis = false;
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        allPeriodPreferences = DataSorter.classPreferences;
+
+    }
+
+    public void updatePrefPeriods(int index, IEnumerable<int> a)
+    {
+        ClassModel x = allPeriodPreferences[index].classModel;
+        if (x.numTimesTeaching < a.Count())
+        {
+            return;//too many of them put in
+        }
+
+        List<int> tempPeriods = (List<int>)(a).Cast<int>().ToList();
+        allPeriodPreferences[index].preferedPeriods = tempPeriods;
+    }
+
+    public void enter()
+    {
+        isVisible = true;
+        DataSorter.classPreferences = allPeriodPreferences;
+        NavigationManager.NavigateTo("scheduleDisplay");
+    }
+
+
+
+    //what periods they perfer
+    //if its an elective or ib class
+}

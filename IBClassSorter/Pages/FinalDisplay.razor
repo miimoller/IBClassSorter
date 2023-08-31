@@ -2,9 +2,21 @@
 @using Data
 <h3>FinalDisplay</h3>
 
+@inject NavigationManager NavigationManager
+
+@if(!DataSorter.stillUnderMax){
+    <RadzenAlert AlertStyle="AlertStyle.Info" ShowIcon="false" Variant="Variant.Flat" Shade="Shade.Lighter" AllowClose="false" >
+    <RadzenText>Over ten thousand schedules found, ended early to save memory. For more specific schedules, add more required period placements</RadzenText>
+    <RadzenButton Click="@goToUpdate">Edit class-placement Preferences</RadzenButton>
+    
+</RadzenAlert>
+}
+
 @if(currentScheduleDisplay!=null){
         <RadzenText >Total Preference Power: @currentScheduleDisplay.possibleSchoolSchedule.totalSchedulePoints</RadzenText>
 }
+
+
 
 
 <RadzenText>Teacher Schedules</RadzenText>
@@ -263,7 +275,9 @@
     bool isLoading = true;
     public DataSorter.possibleGroupSchedule currentScheduleDisplay;
 
-
+    public void goToUpdate(){
+        NavigationManager.NavigateTo("updateClassPref");
+    }
 
     protected override void OnInitialized()
     {

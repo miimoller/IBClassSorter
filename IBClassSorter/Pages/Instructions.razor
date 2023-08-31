@@ -1,0 +1,33 @@
+﻿@page "/instructions"
+<h3>Instructions</h3>
+@inject NavigationManager NavigationManager
+
+<RadzenRow class="rz-background-color-info-lighter rz-color-info rz-mt-2">
+    <RadzenText>Input Teachers Page: Select how many teachers to input, including non-IB elective teachers that a student may want to take (EX: Haaf for engineering). Then input the teacher names.</RadzenText>
+</RadzenRow>
+
+<RadzenRow class="rz-background-color-info-lighter rz-color-info rz-mt-2">
+    <RadzenText>Input Classes Page: Select how many classes to input (can change this field after you inputted some classes in case you missed one). Then give a name to the course and input the teachers that teach that class, including if multiple teachers teach the same class (like the Spanish teachers). Then fill in if those teachers can teach 0th or 7th period (7 is only for classes like TWeir's TOK).</RadzenText>
+</RadzenRow>
+
+<RadzenRow class="rz-background-color-info-lighter rz-color-info rz-mt-2">
+    <RadzenText>Class Preferences Page: Enter what periods you perfer the classes to be (like ASB having to be 4th period). Then check if a class is an elective class (if its not strictly required, like Engineering)</RadzenText>
+</RadzenRow>
+
+<RadzenRow class="rz-background-color-info-lighter rz-color-info rz-mt-2">
+    <RadzenText>Input Students Page: Enter the number of IB students, then add their names and the individual courses that they need to take. </RadzenText>
+    <RadzenText>After you click enter, the schedules will begin to be found. However, as there are usually billions of possible schedules, the system will cut off at 50000</RadzenText>
+</RadzenRow>
+
+<RadzenRow class="rz-background-color-info-lighter rz-color-info rz-mt-2">
+    <RadzenText>Final Display (if over 50000): There will be an alert at the top of the page that will redirect you to the class preferences page. This time add more bias and give teachers that you like the periods that they perfer to lower the number of possible schedules. Repeat until the system finds under 50000 schedules </RadzenText>
+    <RadzenText>If under 50000: The alert will be hidden and the pages will be sorted based on the highly perfered stat class preferences, from which you can choose the desired teacher and student schedules.</RadzenText>
+</RadzenRow>
+
+<RadzenButton Click="@back">Back</RadzenButton>
+
+@code {
+    public void back(){
+        NavigationManager.NavigateTo("/");
+    }
+}

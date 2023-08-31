@@ -10,10 +10,17 @@
     <RadzenRow class="rz-mt-2">
             <RadzenTextBox Placeholder="Enter teacher Name" Change="@(args=> updateTeacherList(args, currentIndex))"></RadzenTextBox>
     </RadzenRow>
-}
+}<RadzenRow>
+
+</RadzenRow>
 <RadzenButton Click="enter">Enter Classes</RadzenButton>
+<RadzenButton Click="instructions">Instructions</RadzenButton>
 
 @code {
+    public void instructions(){
+        NavigationManager.NavigateTo("instructions");
+    }
+
     public int totalTeachers = 0;
     public List<TempTeacherHolder> teachers = new List<TempTeacherHolder>();
 
