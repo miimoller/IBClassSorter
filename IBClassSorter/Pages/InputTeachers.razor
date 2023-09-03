@@ -10,11 +10,15 @@
     <RadzenRow class="rz-mt-2">
             <RadzenTextBox Placeholder="Enter teacher Name" Change="@(args=> updateTeacherList(args, currentIndex))"></RadzenTextBox>
     </RadzenRow>
-}<RadzenRow>
-
+}
+<RadzenRow class="rz-mt-2">
+    <RadzenButton Click="enter">Enter Classes</RadzenButton>
 </RadzenRow>
-<RadzenButton Click="enter">Enter Classes</RadzenButton>
-<RadzenButton Click="instructions">Instructions</RadzenButton>
+
+<RadzenRow class="rz-mt-2">
+    <RadzenButton Size="ButtonSize.ExtraSmall" Click="instructions">Instructions</RadzenButton>
+</RadzenRow>
+
 
 @code {
     public void instructions(){
