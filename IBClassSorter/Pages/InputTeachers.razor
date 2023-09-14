@@ -42,7 +42,7 @@
         }else{
             x.name = name;
         }
-        
+
     }
 
     public TempTeacherHolder getTeacherByIndex(int index){
@@ -64,7 +64,9 @@
                 name=x.name
             });
         }
-        DataSorter.allTeachers = newTeachers;
+
+        DataHolder.allTeachers = newTeachers;
+
         NavigationManager.NavigateTo("inClasses");
     }
 

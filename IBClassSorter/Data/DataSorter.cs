@@ -1,4 +1,5 @@
-﻿using Radzen.Blazor;
+﻿using IBClassSorter.Pages;
+using Radzen.Blazor;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Metrics;
@@ -11,15 +12,15 @@ using System.Threading.Tasks;
 //ON the class prefrences page if one class is set to an elective set all the ones in the same course to be an elective
 namespace IBClassSorter.Data
 {
-    public static class DataSorter
+    public class DataSorter
     {
-        public static List<TeacherModel> allTeachers = new List<TeacherModel>();
-        public static List<ClassModel> allClasses = new List<ClassModel>();
-        public static List<CourseModel> allCourses = new List<CourseModel>();
-        public static List<Data.ClassPreferences> classPreferences = new List<ClassPreferences>();
-        public static List<StudentModel> allStudents = new List<StudentModel>();
+        public  List<TeacherModel> allTeachers = new List<TeacherModel>();
+        public  List<ClassModel> allClasses = new List<ClassModel>();
+        public  List<CourseModel> allCourses = new List<CourseModel>();
+        public  List<Data.ClassPreferences> classPreferences = new List<ClassPreferences>();
+        public  List<StudentModel> allStudents = new List<StudentModel>();
 
-        public static List<possibleTeacherSchedules> allTeacherSchedules = new List<possibleTeacherSchedules>();
+        private  List<possibleTeacherSchedules> allTeacherSchedules = new List<possibleTeacherSchedules>();
 
 
         
@@ -27,14 +28,23 @@ namespace IBClassSorter.Data
 
        // public static List<StudentSchedule> allStudentSchedules = new List<StudentSchedule>();
 
-        public static List<possibleGroupSchedule> finalSchedules=new List<possibleGroupSchedule>();
+        public  List<possibleGroupSchedule> finalSchedules=new List<possibleGroupSchedule>();
 
 
-        public static Thread[] threads;
-        public static Thread[] masterThreads;
+        private static Thread[] threads;
+        
+
+        public DataSorter(List<TeacherModel> t, List<ClassModel> cl, List<CourseModel> cr, List<Data.ClassPreferences> cp, List<StudentModel> s)
+        {
+            allTeachers = t;
+            allClasses = cl;
+            allCourses = cr;
+            classPreferences = cp;
+            allStudents = s;
+        }
 
 
-        public static possibleTeacherSchedules getTeacherSchedulesByTeacherModel(TeacherModel t)
+        private  possibleTeacherSchedules getTeacherSchedulesByTeacherModel(TeacherModel t)
         {
             foreach(possibleTeacherSchedules x in allTeacherSchedules)
             {
@@ -46,7 +56,7 @@ namespace IBClassSorter.Data
             return null;
         }
 
-        public static TeacherSchedule getTeacherScheduleBySchoolSchedule(TeacherModel t, possibleSchoolSchedules s)
+        private TeacherSchedule getTeacherScheduleBySchoolSchedule(TeacherModel t, possibleSchoolSchedules s)
         {
             foreach(TeacherSchedule x in s.allTeacherSchedules)
             {
@@ -58,7 +68,7 @@ namespace IBClassSorter.Data
             return null;
         }
 
-        public static Data.ClassPreferences getClassPreferences(ClassModel c)
+        private Data.ClassPreferences getClassPreferences(ClassModel c)
         {
             foreach(Data.ClassPreferences x in classPreferences)
             {
@@ -70,7 +80,7 @@ namespace IBClassSorter.Data
             return null;
         }
 
-        public static int getPeriodOfClassByTeacherSchedule(TeacherSchedule t, ClassModel c)
+        private int getPeriodOfClassByTeacherSchedule(TeacherSchedule t, ClassModel c)
         {
             for(int i=0;i<t.periods.Length;i++)
             {
@@ -82,7 +92,7 @@ namespace IBClassSorter.Data
             return -1;
         }
 
-        public static (int first, int second) getPeriod2OfClassByTeacherSchedule(TeacherSchedule t, ClassModel c)
+        private (int first, int second) getPeriod2OfClassByTeacherSchedule(TeacherSchedule t, ClassModel c)
         {
             int one = -1;
             int two = -1;
@@ -106,7 +116,7 @@ namespace IBClassSorter.Data
 
 
 
-        public static bool doesStudentHaveCourses(CourseModel x, CourseModel y)
+        private bool doesStudentHaveCourses(CourseModel x, CourseModel y)
         {
             foreach(StudentModel s in allStudents)
             {
@@ -121,7 +131,7 @@ namespace IBClassSorter.Data
             return false;
         }
 
-        public static bool doesStudentHaveCourses(CourseModel x, CourseModel y, CourseModel z)
+        private bool doesStudentHaveCourses(CourseModel x, CourseModel y, CourseModel z)
         {
             foreach (StudentModel s in allStudents)
             {
@@ -136,7 +146,7 @@ namespace IBClassSorter.Data
             return false;
         }
 
-        public static bool isSchoolSchedulePossibleByLoaders(possibleSchoolSchedules s)
+        private bool isSchoolSchedulePossibleByLoaders(possibleSchoolSchedules s)
         {
             List<ClassModel> loadBearers = findFlexibleLoadBearingClasses();
 
@@ -165,7 +175,7 @@ namespace IBClassSorter.Data
             return true;
         }
 
-        public static bool isSchoolSchedulePossibleByDoubleLoaders(possibleSchoolSchedules s)
+        private bool isSchoolSchedulePossibleByDoubleLoaders(possibleSchoolSchedules s)
         {
             List<ClassModel> singleLoaders = findFlexibleLoadBearingClasses();
             List<ClassModel> doubleLoaders = findDoubleLoadBearningClasses();
@@ -221,7 +231,7 @@ namespace IBClassSorter.Data
             return true;
         }
 
-        public static List<ClassModel> findDoubleLoadBearningClasses()
+        private List<ClassModel> findDoubleLoadBearningClasses()
         {
             List<ClassModel> loadBearingClasses = new List<ClassModel>();
             //the classes where there is only one spot (ex:ASB)
@@ -236,7 +246,7 @@ namespace IBClassSorter.Data
             return loadBearingClasses;
         }
 
-        public static List<ClassModel> findFlexibleLoadBearingClasses()
+        private List<ClassModel> findFlexibleLoadBearingClasses()
         {
             List<ClassModel> loadBearingClasses = new List<ClassModel>();
             //the classes where there is only one spot (ex:ASB)
@@ -251,7 +261,7 @@ namespace IBClassSorter.Data
             return loadBearingClasses;
         }
 
-        public static List<ClassModel> findLoadBearingClasses()
+        private List<ClassModel> findLoadBearingClasses()
         {
             List<ClassModel> loadBearingClasses = new List<ClassModel>();
             //the classes where there is only one spot (ex:ASB)
@@ -267,7 +277,7 @@ namespace IBClassSorter.Data
             return loadBearingClasses;
         }
 
-        public static ClassModel getClassModelByCourseAndTeacher(CourseModel c, TeacherModel t)
+        private static ClassModel getClassModelByCourseAndTeacher(CourseModel c, TeacherModel t)
         {
             foreach(ClassModel x in t.classes)
             {
@@ -280,7 +290,7 @@ namespace IBClassSorter.Data
         }
 
 
-        public static List<classModelPlacement> getPeriodPlacements(CourseModel c, possibleSchoolSchedules s)
+        private List<classModelPlacement> getPeriodPlacements(CourseModel c, possibleSchoolSchedules s)
         {
             List<classModelPlacement> placements = new List<classModelPlacement>();
             List<TeacherModel> allCourseTeachers = c.teachers;
@@ -304,9 +314,9 @@ namespace IBClassSorter.Data
             return placements;
         }
 
-        
 
-        public static StudentSchedule getRequiredStudentSchedule(StudentModel s, possibleSchoolSchedules p)
+
+        private StudentSchedule getRequiredStudentSchedule(StudentModel s, possibleSchoolSchedules p)
         {
             StudentSchedule schedule = new StudentSchedule
             {
@@ -338,7 +348,7 @@ namespace IBClassSorter.Data
         /**
          * @return true if current schedule works, false if schedule fails
          */
-        public static bool setAllStudentSchedulesBySchoolSchedule(List<studentScheduleOptions> schedules, possibleSchoolSchedules schedule)
+        private bool setAllStudentSchedulesBySchoolSchedule(List<studentScheduleOptions> schedules, possibleSchoolSchedules schedule)
         {
             
             foreach(StudentModel x in allStudents)//creates and sets all students with their required class placements
@@ -357,11 +367,8 @@ namespace IBClassSorter.Data
                     return false;//FAILURE SCHEDULE
                 }
                 List<int> completedIDs = new List<int>();
-                List<int> courseIDs = new List<int>();
-                foreach (CourseModel course in remainingCourses)
-                {
-                    courseIDs.Add(course.id);
-                }
+                List<int> courseIDs = remainingCourses.Select(c => c.id).ToList();
+                
                 foreach (ClassModel c in temp.periods)
                 {
                     
@@ -384,6 +391,7 @@ namespace IBClassSorter.Data
                 foreach(CourseModel course in completedCourses)
                 {
                     remainingCourses.Remove(course);
+                    
                 }
 
                 List<StudentSchedule> tempFilledIn = new List<StudentSchedule>(); 
@@ -412,7 +420,7 @@ namespace IBClassSorter.Data
         /**
          *
          */
-        public static void fillInRemainingStudentSchedule(List<StudentSchedule> returnList, StudentSchedule _s, possibleSchoolSchedules schedule, List<CourseModel> rC, int numFailedElectives)
+        private void fillInRemainingStudentSchedule(List<StudentSchedule> returnList, StudentSchedule _s, possibleSchoolSchedules schedule, List<CourseModel> rC, int numFailedElectives)
         {
             StudentSchedule s = StudentSchedule.duplicate(_s);
 
@@ -464,7 +472,7 @@ namespace IBClassSorter.Data
             
         }
 
-        public static bool studentScheduleComplete(StudentSchedule s)
+        private bool studentScheduleComplete(StudentSchedule s)
         {
             List<CourseModel> requiredCourses = s.student.courses;
             int numRequired = 0;
@@ -487,7 +495,7 @@ namespace IBClassSorter.Data
             return numRequired == 0;
         }
 
-        public static void removeConflicts()
+        private void removeConflicts()
         {
             List<ClassModel> loadBearers = findLoadBearingClasses();
             foreach(ClassModel x in loadBearers)
@@ -536,7 +544,7 @@ namespace IBClassSorter.Data
             }
         }
 
-        public static void setUpThreads(int totalThreads)
+        private void setUpThreads(int totalThreads)
         {
             tempThreadHolder = new List<possibleGroupSchedule>[totalThreads];
 
@@ -547,7 +555,7 @@ namespace IBClassSorter.Data
             }
 
             threads = new Thread[totalThreads];
-            masterThreads = new Thread[10];
+            
 
             for (int i = 0; i < totalThreads; i++)
             {
@@ -555,18 +563,23 @@ namespace IBClassSorter.Data
                 threads[i] = t;
             }
 
-            for(int i = 0; i < masterThreads.Length; i++)
-            {
-                masterThreads[i] = new Thread(new ParameterizedThreadStart(findOpenThread));
-            }
+           
         }
 
-        public static void setAllPossibleIndividualTeacherSchedules(int totalThreads)
+
+        public void setAllPossibleIndividualTeacherSchedules(object args)
         {
+
+            Array argArray = new object[1];
+            argArray = (Array)args;
+            int totalThreads = (int)argArray.GetValue(0);
+
 
             stillUnderMax = true;
             allTeacherSchedules.Clear();
             finalSchedules.Clear();
+
+            allStudents.Sort(new studentSorter());
 
 
             setUpThreads(totalThreads);
@@ -619,78 +632,55 @@ namespace IBClassSorter.Data
             setPossibleSchedules(new object[2] { 0, new List<TeacherSchedule>() });
 
 
-            mergeMasterThreads();
+            
             mergeThreads();
             finalSchedules.Sort(new possibleGroupSchedule.Sorter());
-            
 
+            InputStudents.isDoneComputing = true;
         }
 
-        public static int threadCounter = 0;
-
-        public static List<possibleGroupSchedule>[] tempThreadHolder;
         
 
-        public static void findOpenThread(object args)
+        private List<possibleGroupSchedule>[] tempThreadHolder;
+
+
+        private void findOpenThread(object args)
         {
-            Array argArray = new object[2];
+            Array argArray = new object[1];
             argArray = (Array)args;
             possibleSchoolSchedules s = (possibleSchoolSchedules)argArray.GetValue(0);
-            int index = (int)argArray.GetValue(1);
+            
             
 
             while (true)
             {
-                for (int i = index; (i < threads.Length); i+=masterThreads.Length)
+                for (int i = 0; (i < threads.Length); i++)
                 {
                     if (threads[i].ThreadState == ThreadState.Unstarted)
                     {
+                      //  InputStudents.console.Log($"Running Studnet Thread: {i}");
                         threads[i].Start(new object[2] { i, s });
-                        masterThreads[index]= new Thread(new ParameterizedThreadStart(findOpenThread));
+                        if (i == threads.Length-1)
+                        {
+                       //     InputStudents.console.Log("Filled All Threads: WAITING");
+                        }
                         return;
                     }
                 }
             }
         }
 
-        public static bool stillUnderMax = true;
+        public bool stillUnderMax = true;
 
-        public static void runStudentThreads(possibleSchoolSchedules s)//FIX THE THREAdS SOME 1495 some 1499 the ends change with diff num of threads
+        private void runStudentThreads(possibleSchoolSchedules s)//FIX THE THREAdS SOME 1495 some 1499 the ends change with diff num of threads
         {
-            while (true)
-            {
-                for (int i = 0; (i < masterThreads.Length); i++)
-                {
-                    if (masterThreads[i].ThreadState == ThreadState.Unstarted)
-                    {
-                        masterThreads[i].Start(new object[2] { s, i });
-                        return;
-                    }
-                }
-            }
+            findOpenThread(new object[1] { s });
 
         }
 
-        public static void mergeMasterThreads()//now only needs to search every 10th one instead of linearly
-        {
-            while (true)
-            {
-                bool allDone = true;
-                for (int i = 0; i < threads.Length; i++)
-                {
-                    if (allDone && threads[i].ThreadState == ThreadState.Running)
-                    {
-                        allDone = false;
-                    }
-                }
-                if (allDone)
-                {
-                    return;
-                }
-            }
-        }
 
-        public static void mergeThreads()
+
+        private void mergeThreads()
         {
             while (true)
             {
@@ -716,8 +706,8 @@ namespace IBClassSorter.Data
             }
         }
 
-       // public static List<int> tmepIndexes = new List<int>();
-        public static void runIndividualStudentThread(object args)
+        // public static List<int> tmepIndexes = new List<int>();
+        private void runIndividualStudentThread(object args)
         {
             Array argArray = new object[2];
             argArray = (Array)args;
@@ -739,22 +729,23 @@ namespace IBClassSorter.Data
               };
 
 
-                    
+           //     InputStudents.console.Log("Added new student schedule");
               tempThreadHolder[startIndex].Add(tempPossibleGroupSchedule);
-                if (caclTotalSchedules() > 10000)
+                if (caclTotalSchedules() > 50)
                 {
                     stillUnderMax = false;
                     //TOO MANY***********************************************************************************************************************
                 }
             }
-                    else
-                    {
-                    }
+            else
+            {
+                //fail
+            }
             
             threads[startIndex] = new Thread(new ParameterizedThreadStart(runIndividualStudentThread));
         }
 
-        public static int caclTotalSchedules()
+        private int caclTotalSchedules()
         {
             int totalSchedules = 0;
             foreach(List<possibleGroupSchedule> x in tempThreadHolder)
@@ -764,11 +755,9 @@ namespace IBClassSorter.Data
             return totalSchedules;
         }
 
-        public static bool threadsEnabled = false;
+       
 
-        public static int numThreads;
-
-        public static void setPossibleSchedules(object args)
+        private void setPossibleSchedules(object args)
         {
             if (stillUnderMax)
             {
@@ -820,7 +809,7 @@ namespace IBClassSorter.Data
             
             
         }
-        public static TeacherSchedule setRequiredClasses(TeacherModel t)
+        private TeacherSchedule setRequiredClasses(TeacherModel t)
         {
             TeacherSchedule allRequiredClasses = new TeacherSchedule
             {
@@ -841,7 +830,7 @@ namespace IBClassSorter.Data
             return allRequiredClasses;
         }
 
-        public static bool scheduleComplete(TeacherSchedule t)
+        private bool scheduleComplete(TeacherSchedule t)
         {
             TeacherModel currentTeach = t.teacher;
 
@@ -863,7 +852,7 @@ namespace IBClassSorter.Data
             
         }
 
-        public static void setAllIndividualTeacherSchedules(TeacherSchedule temp, List<ClassModel> remainingclasses, int currentPeriod, possibleTeacherSchedules l)
+        private void setAllIndividualTeacherSchedules(TeacherSchedule temp, List<ClassModel> remainingclasses, int currentPeriod, possibleTeacherSchedules l)
         {
             TeacherSchedule t = TeacherSchedule.duplicate(temp);
             List<ClassModel> remainingClasses = new List<ClassModel>();
@@ -986,7 +975,17 @@ namespace IBClassSorter.Data
         }
         */
 
-        public static List<ClassModel> removeEmptys(List<ClassModel> input)
+        private static int getTotalNumberOfClasses(CourseModel x)
+        {
+            int total = 0;
+            foreach(TeacherModel t in x.teachers)
+            {
+                total += getClassModelByCourseAndTeacher(x, t).numTimesTeaching;
+            }
+            return total;
+        }
+
+        private List<ClassModel> removeEmptys(List<ClassModel> input)
         {
             List<ClassModel> remainingClasses = new List<ClassModel>();
             foreach(ClassModel x in input)
@@ -1009,7 +1008,7 @@ namespace IBClassSorter.Data
             return total;
         }
         */
-        
+
         /*
         public static bool groupScheduleOverlap(possibleGroupSchedule p)
         {
@@ -1043,7 +1042,7 @@ namespace IBClassSorter.Data
             return true;
         }
         */
-        public class possibleTeacherSchedules{
+        private class possibleTeacherSchedules{
             public TeacherModel teacher { get; set; }
             public List<TeacherSchedule> allSchedules { get; set; }
         }
@@ -1056,7 +1055,7 @@ namespace IBClassSorter.Data
             public int totalSchedulePoints { get; set; }
         }
 
-        public class classModelPlacement
+        private class classModelPlacement
         {
             public ClassModel classType { get; set; }
             public int period { get; set; }
@@ -1075,6 +1074,25 @@ namespace IBClassSorter.Data
                 }
             }
 
+        }
+
+        private class studentSorter : IComparer<StudentModel>
+        {
+            public int Compare(StudentModel x, StudentModel y)
+            {
+                int xScore = 0;
+                int yScore = 0;
+                foreach(CourseModel c in x.courses)
+                {
+                    xScore+=getTotalNumberOfClasses(c);
+                }
+                foreach(CourseModel c in y.courses)
+                {
+                    yScore+=getTotalNumberOfClasses(c);
+                }
+
+                return xScore-yScore;
+            }
         }
 
         public class studentScheduleOptions

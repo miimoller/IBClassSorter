@@ -43,6 +43,15 @@
 }
 <RadzenButton Click="enter">Enter </RadzenButton>
 @code {
+
+
+
+
+
+
+    [Parameter]
+    public List<StudentModel> allStudents { get; set; }
+
     public bool isVisible = false;
 
     public List<Data.ClassPreferences> allPeriodPreferences = new List<Data.ClassPreferences>();
@@ -87,7 +96,7 @@
 
     protected override void OnInitialized()
     {
-        allPeriodPreferences = DataSorter.classPreferences;
+        allPeriodPreferences = DataHolder.allClassesPreferences;
 
     }
 
@@ -106,8 +115,11 @@
     public void enter()
     {
         isVisible = true;
-        DataSorter.classPreferences = allPeriodPreferences;
-        NavigationManager.NavigateTo("scheduleDisplay");
+
+
+
+        DataHolder.allClassesPreferences = allPeriodPreferences;
+        NavigationManager.NavigateTo($"scheduleDisplay");
     }
 
 

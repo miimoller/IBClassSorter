@@ -3,6 +3,7 @@
 @using IBClassSorter.Data
 <h3>InputStudents</h3>
 
+
 <RadzenAlert AlertStyle="AlertStyle.Info" ShowIcon="false" Variant="Variant.Flat" Shade="Shade.Lighter" AllowClose="false" Visible=@isVisible>
     <RadzenText>Please Wait: Calculating Possibilities (Will likely take a long time)</RadzenText>
    
@@ -23,9 +24,26 @@
 
 
 @code {
+
+
+    public List<TeacherModel> allTeachers { get; set; }
+
+
+    public List<CourseModel> allCourses { get; set; }
+
+
+    public List<ClassModel> allClasses { get; set; }
+
+
+    public List<Data.ClassPreferences> classPref { get; set; }
+
+
+
+    //  public static EventConsole console = new EventConsole();
+
     public int totalStudents;
     public List<StudentModel> allStudents;
-    public List<CourseModel> allCourses;
+
 
     bool isVisible = false;
 
@@ -33,11 +51,17 @@
         return getStudentByIndex(index) == null;
     }
 
+    public static bool isDoneComputing = false;
+
     public void enter(){
+
+        //  console.Log("enter");
         isVisible = true;
-        DataSorter.allStudents = allStudents;
-        
-        NavigationManager.NavigateTo("scheduleDisplay");
+
+        DataHolder.allStudents = allStudents;
+
+
+        NavigationManager.NavigateTo($"scheduleDisplay");
     }
 
     public void updateStudentList(object a, int currentIndex){
@@ -47,9 +71,15 @@
     }
 
 
+
+
     protected override void OnInitialized()
     {
-        allCourses = DataSorter.allCourses;
+        allTeachers = DataHolder.allTeachers;
+        allClasses = DataHolder.allClasses;
+        allCourses = DataHolder.allCourses;
+        classPref = DataHolder.allClassesPreferences;
+
         allStudents = new List<StudentModel>();
     }
 

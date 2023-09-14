@@ -37,7 +37,16 @@
 }
 <RadzenButton Click="enter">Enter </RadzenButton>
 @code {
-    public List<ClassModel> allClasses;
+
+    public List<TeacherModel> allTeachers { get; set; }
+
+
+    public List<CourseModel> allCourses { get; set; }
+
+
+    public List<ClassModel> allClasses { get; set; }
+
+
     public List<Data.ClassPreferences> allPeriodPreferences = new List<Data.ClassPreferences>();
 
 
@@ -75,7 +84,9 @@
 
     protected override void OnInitialized()
     {
-        allClasses = DataSorter.allClasses;
+        allCourses=DataHolder.allCourses;
+        allClasses = DataHolder.allClasses;
+        allTeachers = DataHolder.allTeachers;
 
         foreach (ClassModel x in allClasses){
             List<int> tempClassPrefs = new List<int>();
@@ -117,7 +128,7 @@
                 fiveDis = true;
                 sixDis = true;
             }
-            
+
 
 
         }
@@ -135,8 +146,8 @@
     }
 
     public void enter(){
-        DataSorter.classPreferences = allPeriodPreferences;
-        NavigationManager.NavigateTo("inStudents");
+        DataHolder.allClassesPreferences = allPeriodPreferences;
+        NavigationManager.NavigateTo($"inStudents");
     }
 
     

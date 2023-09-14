@@ -46,7 +46,14 @@
 <RadzenButton Click="enter">Enter Classes</RadzenButton>
 
 @code {
-    List<TeacherModel> allTeachers = new List<TeacherModel>();
+    protected override void OnInitialized()
+    {
+        allTeachers = DataHolder.allTeachers;
+    }
+
+    public List<TeacherModel> allTeachers { get; set; }
+
+    
     List<TeacherHolder> teacherGrid = new List<TeacherHolder>();
     /*
     * Add number of classes a teacher teaches per course
@@ -145,9 +152,7 @@
         return null;
     }
 
-    protected override void OnInitialized(){
-        allTeachers = DataSorter.allTeachers;
-    }
+
 
 
     List<string> tempClassNames = new List<string>();
@@ -171,8 +176,8 @@
             tempClassNames.Add(null);
         }
         tempClassNames[index] = name;
-        
-        
+
+
 
 
 
@@ -207,15 +212,15 @@
                         zeroAvail = y.zeroAvail,
                         course = tempCourse,
                         sevenAvail=y.sevenAvail
-                        
+
                     };
                 allClasses.Add(tempClass);
                 y.teacherData.classes.Add(tempClass);
             }
 
         }
-        DataSorter.allClasses = allClasses;
-        DataSorter.allCourses = allCourses;
+        DataHolder.allCourses=allCourses;
+        DataHolder.allClasses = allClasses;
         NavigationManager.NavigateTo("classPref");
     }
 

@@ -4,9 +4,9 @@
 
 @inject NavigationManager NavigationManager
 
-@if(!DataSorter.stillUnderMax){
+@if(!currentDisplay.stillUnderMax){
     <RadzenAlert AlertStyle="AlertStyle.Info" ShowIcon="false" Variant="Variant.Flat" Shade="Shade.Lighter" AllowClose="false" >
-    <RadzenText>Over ten thousand schedules found, ended early to save memory. For more specific schedules, add more required period placements</RadzenText>
+    <RadzenText>Over a thousand schedules found, ended early to save memory. For more specific schedules, add more required period placements</RadzenText>
     <RadzenButton Click="@goToUpdate">Edit class-placement Preferences</RadzenButton>
     
 </RadzenAlert>
@@ -266,6 +266,12 @@
 <RadzenPager ShowPagingSummary="true" PagingSummaryFormat="@pagingSummaryFormat" HorizontalAlign="HorizontalAlign.Right" PageSize="1" Count="count" PageChanged="@PageChanged" />
 
 @code {
+
+    
+
+
+    public DataSorter currentDisplay;
+
     string emptyPeriodMsg = "Empty or Non-IB Class";
     string emptyStudentMsg = "Add Elective or Empty";
 
@@ -283,10 +289,25 @@
     {
         base.OnInitialized();
         isLoading = true;
-        DataSorter.setAllPossibleIndividualTeacherSchedules(10);
 
-        count = DataSorter.finalSchedules.Count;
-        if(DataSorter.finalSchedules.Count!=0){
+        InputStudents.isDoneComputing = false;
+
+        currentDisplay = new DataSorter(DataHolder.allTeachers,DataHolder.allClasses,DataHolder.allCourses,DataHolder.allClassesPreferences,DataHolder.allStudents);
+
+        new Thread(new ParameterizedThreadStart(currentDisplay.setAllPossibleIndividualTeacherSchedules)).Start(new object[1] { 10 });
+
+
+        while (!InputStudents.isDoneComputing)
+        {
+            
+          //  InputStudents.console.ReLoad();
+            
+            Thread.Sleep(1000);
+        }
+        
+
+        count = currentDisplay.finalSchedules.Count;
+        if(currentDisplay.finalSchedules.Count!=0){
             PageChanged(new PagerEventArgs
                 {
                     PageIndex = 0
@@ -301,7 +322,7 @@
 
     void PageChanged(PagerEventArgs args)
     {
-        currentScheduleDisplay = DataSorter.finalSchedules[args.PageIndex];
+        currentScheduleDisplay = currentDisplay.finalSchedules[args.PageIndex];
     }
 
 }
