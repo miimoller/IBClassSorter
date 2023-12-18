@@ -6,15 +6,27 @@
 
 @if(!currentDisplay.stillUnderMax){
     <RadzenAlert AlertStyle="AlertStyle.Info" ShowIcon="false" Variant="Variant.Flat" Shade="Shade.Lighter" AllowClose="false" >
-    <RadzenText>Over a thousand schedules found, ended early to save memory. For more specific schedules, add more required period placements</RadzenText>
+    <RadzenText>Multiple schedules already found, ended early to save memory. For more specific schedules, add more required period placements</RadzenText>
     <RadzenButton Click="@goToUpdate">Edit class-placement Preferences</RadzenButton>
     
 </RadzenAlert>
 }
 
-@if(currentScheduleDisplay!=null){
-        <RadzenText >Total Preference Power: @currentScheduleDisplay.possibleSchoolSchedule.totalSchedulePoints</RadzenText>
+@if(!perfectScheduleFound && currentDisplay.finalSchedules.Count==0){
+<RadzenAlert AlertStyle="AlertStyle.Info" ShowIcon="false" Variant="Variant.Flat" Shade="Shade.Lighter" AllowClose="false" >
+    <RadzenText>No possible schedules, please change period placements</RadzenText>
+    <RadzenButton Click="@goToUpdate">Edit class-placement Preferences</RadzenButton>
+    
+</RadzenAlert>
 }
+
+@if(currentScheduleDisplay!=null && !perfectScheduleFound){
+        <RadzenText >Total Preference Power: @currentScheduleDisplay.possibleSchoolSchedule.totalSchedulePoints</RadzenText>
+}else if (currentScheduleDisplay!=null){
+    <RadzenText>Schedules Found meet all placement preferences</RadzenText>
+}
+
+
 
 
 
@@ -267,8 +279,8 @@
 
 @code {
 
-    
 
+    public bool perfectScheduleFound = false;
 
     public DataSorter currentDisplay;
 
@@ -285,26 +297,88 @@
         NavigationManager.NavigateTo("updateClassPref");
     }
 
+    public void testWithBias(){
+
+        List<Data.ClassPreferences> biasedPreferences = new List<Data.ClassPreferences>();
+        foreach (Data.ClassPreferences x in DataHolder.allClassesPreferences)
+        {
+            if(x.preferencePower==2){
+                biasedPreferences.Add(new Data.ClassPreferences
+                    {
+                        classModel = x.classModel,
+                        preferedPeriods = x.preferedPeriods,
+                        isElective = x.isElective,
+                        preferencePower = 1
+                    });
+            }else{
+                biasedPreferences.Add(new Data.ClassPreferences
+                    {
+                        classModel = x.classModel,
+                        preferedPeriods = x.preferedPeriods,
+                        isElective = x.isElective,
+                        preferencePower = x.preferencePower
+                    });
+            }
+        }
+
+
+        DataSorter testBias = new DataSorter(DataHolder.allTeachers, DataHolder.allClasses, DataHolder.allCourses, biasedPreferences, DataHolder.allStudents,50);
+
+        testBias.setAllPossibleIndividualTeacherSchedules(new object[1] { Environment.ProcessorCount });
+
+        if(testBias.finalSchedules.Count!=0){
+            currentDisplay = testBias;
+            perfectScheduleFound = true;
+        }else{
+            testBias=null;//clear memory
+            List<Data.ClassPreferences> halfBiasedPreferences = new List<Data.ClassPreferences>();
+            foreach (Data.ClassPreferences x in DataHolder.allClassesPreferences)
+            {
+                Random rand=new Random();
+
+                if(x.preferencePower==2 && (rand.NextDouble()>.5)){
+                    halfBiasedPreferences.Add(new Data.ClassPreferences
+                        {
+                            classModel = x.classModel,
+                            preferedPeriods = x.preferedPeriods,
+                            isElective = x.isElective,//fits all the electives too
+                            preferencePower = 1
+                        });
+                }else{
+                    halfBiasedPreferences.Add(new Data.ClassPreferences
+                        {
+                            classModel = x.classModel,
+                            preferedPeriods = x.preferedPeriods,
+                            isElective = x.isElective,
+                            preferencePower = x.preferencePower
+                        });
+                }
+            }
+
+            DataSorter halfBias=new DataSorter(DataHolder.allTeachers, DataHolder.allClasses, DataHolder.allCourses, halfBiasedPreferences, DataHolder.allStudents,50);
+            halfBias.setAllPossibleIndividualTeacherSchedules(new object[1] { Environment.ProcessorCount });
+
+            if (halfBias.finalSchedules.Count != 0)
+            {
+                currentDisplay = halfBias;
+            }else{//Regular
+                halfBias = null;//clear memory
+                currentDisplay = new DataSorter(DataHolder.allTeachers, DataHolder.allClasses, DataHolder.allCourses, DataHolder.allClassesPreferences, DataHolder.allStudents,1);
+                currentDisplay.setAllPossibleIndividualTeacherSchedules(new object[1] { Environment.ProcessorCount });
+            }
+            
+        }
+
+        
+    }
+
     protected override void OnInitialized()
     {
         base.OnInitialized();
         isLoading = true;
 
-        InputStudents.isDoneComputing = false;
+        testWithBias();
 
-        currentDisplay = new DataSorter(DataHolder.allTeachers,DataHolder.allClasses,DataHolder.allCourses,DataHolder.allClassesPreferences,DataHolder.allStudents);
-
-        new Thread(new ParameterizedThreadStart(currentDisplay.setAllPossibleIndividualTeacherSchedules)).Start(new object[1] { 10 });
-
-
-        while (!InputStudents.isDoneComputing)
-        {
-            
-          //  InputStudents.console.ReLoad();
-            
-            Thread.Sleep(1000);
-        }
-        
 
         count = currentDisplay.finalSchedules.Count;
         if(currentDisplay.finalSchedules.Count!=0){
